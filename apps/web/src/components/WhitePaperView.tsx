@@ -1,278 +1,644 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FileText, ShieldCheck, Award, Layers, Dna, Compass, Activity, BookOpen } from 'lucide-react';
+import {
+  FileText,
+  ShieldCheck,
+  Award,
+  Layers,
+  Dna,
+  Compass,
+  Activity,
+  Download,
+  CheckCircle2,
+  AlertTriangle,
+  FileSpreadsheet,
+  TrendingUp,
+  Brain,
+  Heart,
+  Eye,
+  ActivitySquare,
+  Sparkles,
+  ChevronRight,
+  BookOpen,
+} from 'lucide-react';
+import { WHITE_PAPERS, WhitePaperData } from '../constants/whitePapers';
 
 export default function WhitePaperView() {
-  const [activePaper, setActivePaper] = useState<'menin' | 'pde' | 'teratoma' | 'regenera'>('menin');
+  const [selectedId, setSelectedId] = useState<string>('bone_marrow_aml');
+  const [isExporting, setIsExporting] = useState<boolean>(false);
+
+  const paper: WhitePaperData = WHITE_PAPERS[selectedId] || WHITE_PAPERS['bone_marrow_aml'];
+
+  // Helper icons for categories
+  const getLineageIcon = (id: string) => {
+    switch (id) {
+      case 'bone_marrow_aml':
+        return <Dna className="w-4 h-4 text-noorEmerald" />;
+      case 'corneal_limbal':
+        return <Eye className="w-4 h-4 text-cyanCore" />;
+      case 'skin_epidermis':
+        return <Sparkles className="w-4 h-4 text-amber-400" />;
+      case 'cardiac_patch':
+        return <Heart className="w-4 h-4 text-red-400" />;
+      case 'pancreatic_islet':
+        return <ActivitySquare className="w-4 h-4 text-purple-400" />;
+      case 'putamen_dopaminergic':
+        return <Brain className="w-4 h-4 text-blue-400" />;
+      case 'cochlear_hair_cell':
+        return <Activity className="w-4 h-4 text-teal-400" />;
+      case 'articular_cartilage':
+        return <Layers className="w-4 h-4 text-emerald-400" />;
+      case 'alveolar_at2':
+        return <Compass className="w-4 h-4 text-sky-400" />;
+      default:
+        return <FileText className="w-4 h-4 text-noorEmerald" />;
+    }
+  };
+
+  // Export 1: Download PDF Dossier via API
+  const handleExportPdf = async () => {
+    setIsExporting(true);
+    try {
+      const response = await fetch('http://localhost:8080/api/v1/dossier/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sample_id: paper.regulatoryAudit.sampleId,
+          pde_tissue_name: paper.id,
+          pde_num_cells: 64,
+          pde_stress_sigma: parseFloat(paper.mathematicalEngine.pdeParameters.tissueStress) || 0.0482,
+          pde_velocity_vector: paper.mathematicalEngine.pdeParameters.chemotacticDrift,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('PDF Generation API request failed');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `CellNoor_WhitePaper_${paper.id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.warn('Backend API fallback triggered for PDF download:', err);
+      // Fallback text download if API unreachable
+      handleExportTxt();
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Export 2: Download Word Document (.docx / HTML blob)
+  const handleExportDocx = () => {
+    const htmlContent = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset='utf-8'>
+        <title>${paper.title}</title>
+        <style>
+          body { font-family: Arial, sans-serif; color: #0F172A; line-height: 1.5; padding: 20px; }
+          h1 { color: #0E7490; font-size: 20pt; margin-bottom: 5px; }
+          h2 { color: #0F172A; font-size: 14pt; border-bottom: 2px solid #0E7490; padding-bottom: 4px; margin-top: 20px; }
+          .meta { color: #64748B; font-size: 9pt; margin-bottom: 15px; }
+          .motto { color: #10B981; font-style: italic; font-weight: bold; margin-bottom: 20px; }
+          .summary-box { background: #F8FAFC; border: 1px solid #CBD5E1; padding: 12px; margin-bottom: 15px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th, td { border: 1px solid #CBD5E1; padding: 8px; text-align: left; font-size: 9.5pt; }
+          th { background: #F1F5F9; }
+          .code-box { background: #0F172A; color: #38BDF8; font-family: monospace; padding: 10px; font-size: 9pt; }
+        </style>
+      </head>
+      <body>
+        <h1>${paper.title}</h1>
+        <div className="meta">
+          <strong>Category:</strong> ${paper.category} | <strong>Published:</strong> ${paper.publishedDate}<br/>
+          <strong>Operating Entity:</strong> Horizon Commerce LLC (Lorton, VA; UEI: NY9AHGK2BBZ7)<br/>
+          <strong>Ecosystem:</strong> NoorGenX Platform Suite (amjad@noorgenx.com)
+        </div>
+        <div className="motto">"No cancer left behind. Every patient has a cure."</div>
+
+        <div className="summary-box">
+          <strong>Indication:</strong> ${paper.indication}<br/>
+          <strong>Addressable Market:</strong> ${paper.marketSize}<br/>
+          <strong>Estimated Value / ROI:</strong> ${paper.estimatedRoi}<br/><br/>
+          <strong>Executive Summary:</strong> ${paper.executiveSummary}
+        </div>
+
+        <h2>1. Clinical Problem & Mechanism</h2>
+        <p>${paper.clinicalProblem.description}</p>
+        <p><strong>Key Mechanisms:</strong></p>
+        <ul>
+          ${paper.clinicalProblem.keyMechanisms.map((m) => `<li>${m}</li>`).join('')}
+        </ul>
+        <p><strong>Cell State Dynamics:</strong></p>
+        <ul>
+          ${paper.clinicalProblem.cellStateDynamics.map((d) => `<li>${d}</li>`).join('')}
+        </ul>
+
+        <h2>2. Mathematical Engine & PDE Dynamics</h2>
+        <div className="code-box">${paper.mathematicalEngine.systemEquation}</div>
+        <p>
+          <strong>Fisher Information Matrix Min Eigenvalue (λ_min):</strong> ${paper.mathematicalEngine.fimEigenvalue} [${paper.mathematicalEngine.identifiabilityStatus}]<br/>
+          <strong>Diffusion D_m:</strong> ${paper.mathematicalEngine.pdeParameters.diffusionD_m} | 
+          <strong>Chemotactic Drift:</strong> ${paper.mathematicalEngine.pdeParameters.chemotacticDrift} | 
+          <strong>Tissue Stress:</strong> ${paper.mathematicalEngine.pdeParameters.tissueStress}
+        </p>
+
+        <h2>3. Benchmark Audit Metrics</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>CellNoor Score</th>
+              <th>Standard Baseline</th>
+              <th>Net Superiority</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${paper.benchmarkMetrics
+              .map(
+                (b) => `
+              <tr>
+                <td>${b.name}</td>
+                <td><b>${b.cellNoorScore}</b></td>
+                <td>${b.standardBaseline}</td>
+                <td><font color="#10B981"><b>${b.netSuperiority}</b></font></td>
+              </tr>
+            `
+              )
+              .join('')}
+          </tbody>
+        </table>
+
+        <h2>4. Regulatory Audit & Safety Gate</h2>
+        <p>
+          <strong>Sample Accession:</strong> ${paper.regulatoryAudit.sampleId}<br/>
+          <strong>FDA CBER Teratoma Hazard (S_teratoma):</strong> ${paper.regulatoryAudit.teratomaScore} [${paper.regulatoryAudit.teratomaStatus}]<br/>
+          <strong>Karyotype Instability:</strong> ${paper.regulatoryAudit.karyotypeScore}<br/>
+          <strong>Differential Vulnerability Ratio (DVR):</strong> ${paper.regulatoryAudit.dvrSelectivity} [${paper.regulatoryAudit.normalSelectivityStatus}]
+        </p>
+
+        <h2>5. Multi-Omics Evidence Graph</h2>
+        <p><strong>Supporting Evidence:</strong></p>
+        <ul>${paper.evidenceGraph.supporting.map((s) => `<li>${s}</li>`).join('')}</ul>
+        <p><strong>Contradicting Evidence:</strong></p>
+        <ul>${paper.evidenceGraph.contradicting.map((c) => `<li>${c}</li>`).join('')}</ul>
+        <p><strong>Weakest Link:</strong> ${paper.evidenceGraph.weakestLink}</p>
+
+        <hr/>
+        <p className="meta">Horizon Commerce LLC | License Clearance Verified | NoorGenX Platform Suite</p>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob(['\ufeff' + htmlContent], {
+      type: 'application/vnd.ms-word;charset=utf-8',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `CellNoor_WhitePaper_${paper.id}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
+  // Export 3: Download Plain Text Dossier (.txt)
+  const handleExportTxt = () => {
+    const txtContent = `
+================================================================================
+CELLNOOR TECHNICAL WHITE PAPER & CLINICAL DOSSIER
+Title: ${paper.title}
+Category: ${paper.category} | Published: ${paper.publishedDate}
+Operating Entity: Horizon Commerce LLC (Lorton, VA; UEI: NY9AHGK2BBZ7)
+Ecosystem: NoorGenX Platform Suite (amjad@noorgenx.com)
+Motto: "No cancer left behind. Every patient has a cure."
+================================================================================
+
+1. EXECUTIVE SUMMARY & ROI
+Indication: ${paper.indication}
+Market Size: ${paper.marketSize}
+Estimated Value / ROI: ${paper.estimatedRoi}
+
+Summary:
+${paper.executiveSummary}
+
+Commercial Impact:
+${paper.commercialImpact.map((c) => `- ${c}`).join('\n')}
+
+2. CLINICAL PROBLEM & CELL DYNAMICS
+Title: ${paper.clinicalProblem.title}
+Description:
+${paper.clinicalProblem.description}
+
+Key Mechanisms:
+${paper.clinicalProblem.keyMechanisms.map((m) => `- ${m}`).join('\n')}
+
+Cell State Dynamics:
+${paper.clinicalProblem.cellStateDynamics.map((d) => `- ${d}`).join('\n')}
+
+3. MATHEMATICAL ENGINE & PDE DIAGNOSTICS
+System Equation: ${paper.mathematicalEngine.systemEquation}
+FIM Min Eigenvalue (λ_min): ${paper.mathematicalEngine.fimEigenvalue} [Status: ${paper.mathematicalEngine.identifiabilityStatus}]
+PDE Parameters:
+- Diffusion D_m: ${paper.mathematicalEngine.pdeParameters.diffusionD_m}
+- Chemotactic Drift: ${paper.mathematicalEngine.pdeParameters.chemotacticDrift}
+- Continuum Stress: ${paper.mathematicalEngine.pdeParameters.tissueStress}
+
+4. BENCHMARK AUDIT METRICS
+${paper.benchmarkMetrics
+  .map(
+    (b) =>
+      `- ${b.name}: CellNoor=${b.cellNoorScore} | Baseline=${b.standardBaseline} | Superiority=${b.netSuperiority}`
+  )
+  .join('\n')}
+
+5. REGULATORY AUDIT & SAFETY GATE
+Sample Accession: ${paper.regulatoryAudit.sampleId}
+FDA CBER Teratoma Hazard (S_teratoma): ${paper.regulatoryAudit.teratomaScore} [${paper.regulatoryAudit.teratomaStatus}]
+Karyotype Instability: ${paper.regulatoryAudit.karyotypeScore}
+DVR Selectivity: ${paper.regulatoryAudit.dvrSelectivity} [${paper.regulatoryAudit.normalSelectivityStatus}]
+
+6. MULTI-OMICS EVIDENCE GRAPH
+Supporting Evidence:
+${paper.evidenceGraph.supporting.map((s) => `- ${s}`).join('\n')}
+Contradicting Evidence:
+${paper.evidenceGraph.contradicting.map((c) => `- ${c}`).join('\n')}
+Weakest Link: ${paper.evidenceGraph.weakestLink}
+
+================================================================================
+Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com)
+================================================================================
+    `.trim();
+
+    const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `CellNoor_WhitePaper_${paper.id}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="neu-card p-6 border border-convexBorder rounded-xl space-y-6 max-w-5xl mx-auto my-4 text-slate-200">
-      {/* Paper Selector Tabs */}
-      <div className="flex items-center gap-2 border-b border-convexBorder pb-4 overflow-x-auto">
-        <button
-          onClick={() => setActivePaper('menin')}
-          className={`px-3 py-2 rounded-lg text-xs font-mono font-bold flex items-center gap-2 border ${
-            activePaper === 'menin' ? 'bg-slate-800 text-noorEmerald border-noorEmerald' : 'text-slate-400 border-convexBorder hover:bg-slate-800/50'
-          }`}
-        >
-          <Dna className="w-4 h-4 text-noorEmerald" />
-          <span>Paper 1: Menin Escape (AML Flagship)</span>
-        </button>
+    <div className="neu-card p-6 border border-convexBorder rounded-xl space-y-6 max-w-6xl mx-auto my-4 text-slate-200">
+      {/* Lineage Selector Bar */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-cyanCore" />
+            <h2 className="text-sm font-bold text-slate-100 uppercase tracking-wider font-mono">
+              Enterprise Multi-Lineage Technical White Paper & Clinical Dossier Suite
+            </h2>
+          </div>
+          <span className="text-xs font-mono text-slate-400">
+            9 Target Domains Active
+          </span>
+        </div>
 
-        <button
-          onClick={() => setActivePaper('pde')}
-          className={`px-3 py-2 rounded-lg text-xs font-mono font-bold flex items-center gap-2 border ${
-            activePaper === 'pde' ? 'bg-slate-800 text-cyanCore border-cyanCore' : 'text-slate-400 border-convexBorder hover:bg-slate-800/50'
-          }`}
-        >
-          <Layers className="w-4 h-4 text-cyanCore" />
-          <span>Paper 2: Multiscale Spatial PDE & FIM</span>
-        </button>
-
-        <button
-          onClick={() => setActivePaper('teratoma')}
-          className={`px-3 py-2 rounded-lg text-xs font-mono font-bold flex items-center gap-2 border ${
-            activePaper === 'teratoma' ? 'bg-slate-800 text-amber-400 border-amber-400' : 'text-slate-400 border-convexBorder hover:bg-slate-800/50'
-          }`}
-        >
-          <ShieldCheck className="w-4 h-4 text-amber-400" />
-          <span>Paper 3: FDA Teratoma & Safety Gate</span>
-        </button>
-
-        <button
-          onClick={() => setActivePaper('regenera')}
-          className={`px-3 py-2 rounded-lg text-xs font-mono font-bold flex items-center gap-2 border ${
-            activePaper === 'regenera' ? 'bg-slate-800 text-emerald-400 border-emerald-400' : 'text-slate-400 border-convexBorder hover:bg-slate-800/50'
-          }`}
-        >
-          <Compass className="w-4 h-4 text-emerald-400" />
-          <span>Paper 4: Stem Cell Regenera Packs</span>
-        </button>
+        {/* 9 Lineage Tabs */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+          {Object.values(WHITE_PAPERS).map((item) => {
+            const isSelected = item.id === selectedId;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setSelectedId(item.id)}
+                className={`px-3 py-2 rounded-lg text-xs font-mono font-bold flex items-center gap-2 border transition-all whitespace-nowrap ${
+                  isSelected
+                    ? 'bg-slate-800 text-cyanCore border-cyanCore shadow-lg shadow-cyanCore/10'
+                    : 'text-slate-400 border-convexBorder hover:bg-slate-800/50 hover:text-slate-200'
+                }`}
+              >
+                {getLineageIcon(item.id)}
+                <span>{item.category.split(' ')[0]}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* PAPER 1: MENIN ESCAPE (AML FLAGSHIP) */}
-      {activePaper === 'menin' && (
-        <div className="space-y-6">
-          <div className="border-b border-convexBorder pb-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-noorEmerald/20 text-noorEmerald border border-noorEmerald/40">
-                TECHNICAL WHITE PAPER #1 — ONCOLOGY FLAGSHIP
+      {/* Main Header & Export Bar */}
+      <div className="border-t border-b border-convexBorder py-4 space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-cyanCore/20 text-cyanCore border border-cyanCore/40 uppercase">
+                {paper.category}
               </span>
-              <span className="text-xs font-mono text-slate-400">Published: October 2026</span>
+              <span className="text-xs font-mono text-slate-400">
+                Published: {paper.publishedDate}
+              </span>
             </div>
             <h1 className="text-xl md:text-2xl font-black text-slate-100 tracking-wide">
-              Predicting Menin-Inhibitor Escape: A Benchmark Audit on NPM1/KMT2A Resistance
+              {paper.title}
             </h1>
-            <div className="text-xs font-mono text-slate-400 space-y-0.5">
-              <p><strong>Operating Entity:</strong> Horizon Commerce LLC (Lorton, VA; UEI: <span className="text-cyanCore">NY9AHGK2BBZ7</span>)</p>
-              <p><strong>Parent Ecosystem:</strong> NoorGenX Platform Suite (amjad@noorgenx.com)</p>
-              <p><strong>Scientific Motto:</strong> <span className="text-noorEmerald font-semibold">"No cancer left behind. Every patient has a cure."</span></p>
+          </div>
+
+          {/* Export Tray */}
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={handleExportPdf}
+              disabled={isExporting}
+              className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-cyanCore border border-cyanCore/40 flex items-center gap-1.5 transition-all shadow-sm"
+              title="Download Executive PDF Dossier"
+            >
+              <Download className="w-3.5 h-3.5 text-cyanCore" />
+              <span>{isExporting ? 'Generating...' : 'PDF (.pdf)'}</span>
+            </button>
+
+            <button
+              onClick={handleExportDocx}
+              className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-noorEmerald border border-noorEmerald/40 flex items-center gap-1.5 transition-all shadow-sm"
+              title="Download Word Document"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-noorEmerald" />
+              <span>Word (.docx)</span>
+            </button>
+
+            <button
+              onClick={handleExportTxt}
+              className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-convexBorder flex items-center gap-1.5 transition-all shadow-sm"
+              title="Download Plain Text Dossier"
+            >
+              <FileText className="w-3.5 h-3.5 text-slate-400" />
+              <span>Text (.txt)</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Corporate Provenance Header */}
+        <div className="neu-inset p-3 rounded-lg text-xs font-mono text-slate-400 grid grid-cols-1 md:grid-cols-3 gap-2 border border-slate-800/80 bg-slate-950/50">
+          <div>
+            <span className="text-slate-500">Operating Entity:</span>{' '}
+            <span className="text-cyanCore font-semibold">Horizon Commerce LLC</span> (Lorton, VA)
+          </div>
+          <div>
+            <span className="text-slate-500">UEI:</span>{' '}
+            <span className="text-noorEmerald font-semibold">NY9AHGK2BBZ7</span>
+          </div>
+          <div>
+            <span className="text-slate-500">Ecosystem:</span>{' '}
+            <span className="text-slate-200">NoorGenX (amjad@noorgenx.com)</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 1. Executive Summary & Market ROI */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 neu-inset p-4 rounded-xl space-y-2 border border-slate-800 bg-slate-950/60">
+          <h2 className="text-xs font-bold text-noorEmerald uppercase tracking-wider flex items-center gap-2 font-mono">
+            <Award className="w-4 h-4 text-noorEmerald" />
+            Executive Summary & Clinical Rationale
+          </h2>
+          <p className="text-xs text-slate-300 leading-relaxed">
+            {paper.executiveSummary}
+          </p>
+        </div>
+
+        <div className="neu-card-convex p-4 rounded-xl space-y-3 border border-convexBorder bg-slate-900/60 font-mono text-xs">
+          <h3 className="text-slate-400 font-bold uppercase tracking-wider text-[11px] border-b border-convexBorder pb-1 flex items-center gap-1.5">
+            <TrendingUp className="w-3.5 h-3.5 text-cyanCore" />
+            Commercial & Clinical Value
+          </h3>
+          <div className="space-y-2">
+            <div>
+              <div className="text-slate-500 text-[10px]">Target Indication:</div>
+              <div className="text-slate-200 font-bold">{paper.indication}</div>
             </div>
-          </div>
-
-          <div className="neu-inset p-4 rounded-xl space-y-2 border border-slate-800 bg-slate-950/60">
-            <h2 className="text-sm font-bold text-noorEmerald uppercase tracking-wider flex items-center gap-2">
-              <Award className="w-4 h-4 text-noorEmerald" />
-              Executive Summary
-            </h2>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Acute Myeloid Leukemia (AML) driven by <em>NPM1</em> mutations or <em>KMT2A</em> rearrangements represents a high-risk hematologic malignancy.
-              While Menin-KMT2A binding inhibitors—such as Revumenib (SNDX-5613) and Ziftomenib (KO-539)—demonstrate significant initial blast clearance,
-              emerging secondary mutations (specifically <strong>MEN1 M327I</strong> and <strong>FLT3/RAS bypass clones</strong>) trigger disease relapse in up to 40% of patients.
-              <br /><br />
-              Here we present <strong>CellNoor Flagship #1</strong>, an evidence-centric Cellular Digital Twin operating environment designed to model, predict, and de-risk combination therapies that eliminate menin-inhibitor escape clones prior to wet-lab synthesis.
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            <h2 className="text-sm font-bold text-cyanCore uppercase tracking-wider border-b border-convexBorder pb-1">
-              1. Clinical Problem & Escape Mutational Landscape
-            </h2>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Continuous therapeutic pressure selects for point mutations in <em>MEN1</em> (M327I) that structurally decrease inhibitor binding affinity
-              (&Delta;G shifts from -9.1 kcal/mol to -6.2 kcal/mol) while preserving endogenous KMT2A interaction.
-            </p>
-            <div className="neu-inset p-3 rounded-lg text-xs font-mono space-y-1">
-              <div className="text-slate-400 font-bold">Cell State Dynamics (S₁ &rarr; S₅):</div>
-              <div className="text-slate-300">• S₁ Normal HSC &rarr; S₂ Persistent LSC (HOXA9/MEIS1 High)</div>
-              <div className="text-slate-300">• S₂ + Menin Inhibitor (U₁) &rarr; S₄ Differentiated Myeloid (CD14+)</div>
-              <div className="text-cyanCore">• S₂ + Selection Pressure &rarr; S₅ MEN1 M327I Resistant Escape Clone</div>
+            <div>
+              <div className="text-slate-500 text-[10px]">Addressable Market:</div>
+              <div className="text-cyanCore font-bold">{paper.marketSize}</div>
             </div>
-          </div>
-
-          <div className="space-y-3">
-            <h2 className="text-sm font-bold text-cyanCore uppercase tracking-wider border-b border-convexBorder pb-1">
-              2. Mathematical Engine: Q-Matrix System & FIM Identifiability
-            </h2>
-            <div className="neu-card-convex p-3 rounded-lg text-center font-mono text-xs text-noorEmerald border border-noorEmerald/30">
-              dp/dt = Q(U, N)p = [ D(U) + T(U) - K_kill(U) ] p
-            </div>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Fisher Information Matrix (FIM) sensitivity spectrum eigenvalue &lambda;_min &ge; 10⁻³ confirms model parameter identifiability across Beat AML datasets.
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            <h2 className="text-sm font-bold text-cyanCore uppercase tracking-wider border-b border-convexBorder pb-1">
-              3. Benchmark Audit & Performance Metrics
-            </h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-900 text-slate-300 border-b border-convexBorder">
-                    <th className="p-2.5">Benchmark Metric</th>
-                    <th className="p-2.5">CellNoor Accuracy</th>
-                    <th className="p-2.5">Standard Baseline</th>
-                    <th className="p-2.5">Net Superiority</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-convexBorder font-mono">
-                  <tr>
-                    <td className="p-2.5 text-slate-200">2D Bliss Combination Synergy Surface Peak</td>
-                    <td className="p-2.5 text-noorEmerald">U₁=0.71, U₂=0.42</td>
-                    <td className="p-2.5 text-slate-400">Additive Bliss</td>
-                    <td className="p-2.5 text-noorEmerald font-bold">+38.0% Excess Kill</td>
-                  </tr>
-                  <tr>
-                    <td className="p-2.5 text-slate-200">Combination Ranking AUC</td>
-                    <td className="p-2.5 text-noorEmerald">0.892 AUC</td>
-                    <td className="p-2.5 text-slate-400">0.550 (Random)</td>
-                    <td className="p-2.5 text-noorEmerald font-bold">+34.2%</td>
-                  </tr>
-                  <tr>
-                    <td className="p-2.5 text-slate-200">Escape Clone Sensitivity</td>
-                    <td className="p-2.5 text-noorEmerald">0.845</td>
-                    <td className="p-2.5 text-slate-400">0.660 (Linear DE)</td>
-                    <td className="p-2.5 text-noorEmerald font-bold">+18.5%</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div>
+              <div className="text-slate-500 text-[10px]">Estimated Trial ROI:</div>
+              <div className="text-noorEmerald font-bold">{paper.estimatedRoi}</div>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* PAPER 2: MULTISCALE SPATIAL PDE & FIM */}
-      {activePaper === 'pde' && (
-        <div className="space-y-6">
-          <div className="border-b border-convexBorder pb-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-cyanCore/20 text-cyanCore border border-cyanCore/40">
-                TECHNICAL WHITE PAPER #2 — LAYER 1 & 2 ENGINE
-              </span>
-              <span className="text-xs font-mono text-slate-400">Published: October 2026</span>
+      {/* Commercial Impact Highlights */}
+      <div className="neu-inset p-3.5 rounded-xl border border-slate-800 bg-slate-950/40">
+        <div className="text-xs font-bold text-cyanCore uppercase font-mono mb-2 flex items-center gap-1.5">
+          <ChevronRight className="w-4 h-4 text-cyanCore" />
+          Key Commercial Impact Directives
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-slate-300">
+          {paper.commercialImpact.map((item, idx) => (
+            <div key={idx} className="flex items-start gap-2 bg-slate-900/40 p-2 rounded border border-slate-800/60">
+              <CheckCircle2 className="w-3.5 h-3.5 text-noorEmerald shrink-0 mt-0.5" />
+              <span>{item}</span>
             </div>
-            <h1 className="text-xl md:text-2xl font-black text-slate-100 tracking-wide">
-              Inverse Parameter Estimation & 3D Extracellular Morphogen Mesh Coupling
-            </h1>
-            <div className="text-xs font-mono text-slate-400 space-y-0.5">
-              <p><strong>Focus:</strong> PDE-SDE-Gillespie Multiscale Spatial-Temporal Integration & Fisher Information Matrix Identifiability</p>
-              <p><strong>Platform:</strong> CellNoor Multiscale Spatial Engine (packages/math_engine)</p>
-            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 2. Clinical Problem & Cell Dynamics */}
+      <div className="space-y-3 border-t border-convexBorder pt-4">
+        <h2 className="text-xs font-bold text-cyanCore uppercase tracking-wider font-mono flex items-center gap-2">
+          <Dna className="w-4 h-4 text-cyanCore" />
+          1. Clinical Problem & Cell State Dynamics
+        </h2>
+        <div className="space-y-2">
+          <h3 className="text-sm font-bold text-slate-200">{paper.clinicalProblem.title}</h3>
+          <p className="text-xs text-slate-300 leading-relaxed">{paper.clinicalProblem.description}</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="neu-inset p-3 rounded-lg space-y-1.5 text-xs font-mono bg-slate-950/60 border border-slate-800">
+            <div className="text-noorEmerald font-bold border-b border-slate-800 pb-1">Key Molecular Mechanisms:</div>
+            {paper.clinicalProblem.keyMechanisms.map((mech, idx) => (
+              <div key={idx} className="text-slate-300 flex items-start gap-1.5">
+                <span className="text-noorEmerald">•</span>
+                <span>{mech}</span>
+              </div>
+            ))}
           </div>
 
-          <div className="neu-inset p-4 rounded-xl space-y-2 border border-slate-800 bg-slate-950/60 text-xs text-slate-300">
-            <h2 className="text-sm font-bold text-cyanCore uppercase tracking-wider flex items-center gap-2">
-              <Layers className="w-4 h-4 text-cyanCore" />
-              Core Mathematical Architecture
-            </h2>
-            <p className="leading-relaxed">
-              Simulates continuum extracellular diffusible morphogens (Oxygen O₂, Wnt, VEGF) using 3D diffusion-reaction PDEs coupled to per-cell stochastic SDE fate decisions and viscoelastic chemotactic migration:
-            </p>
-            <div className="neu-card-convex p-3 rounded-lg text-center font-mono text-xs text-cyanCore border border-cyanCore/30">
-              &part;c_m(&mathbf;r, t)/&part;t = &nabla;&middot;(D_m(&mathbf;r)&nabla;c_m) - &gamma;_m c_m + &sum; q_m,i &delta;(&mathbf;r - &mathbf;r_i)
-            </div>
+          <div className="neu-inset p-3 rounded-lg space-y-1.5 text-xs font-mono bg-slate-950/60 border border-slate-800">
+            <div className="text-cyanCore font-bold border-b border-slate-800 pb-1">Cell State Dynamics Trajectory:</div>
+            {paper.clinicalProblem.cellStateDynamics.map((dyn, idx) => (
+              <div key={idx} className="text-slate-300 flex items-start gap-1.5">
+                <span className="text-cyanCore">→</span>
+                <span>{dyn}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Mathematical Engine & PDE Diagnostics */}
+      <div className="space-y-3 border-t border-convexBorder pt-4">
+        <h2 className="text-xs font-bold text-cyanCore uppercase tracking-wider font-mono flex items-center gap-2">
+          <Layers className="w-4 h-4 text-cyanCore" />
+          2. Mathematical Engine & 3D Multiscale Spatial PDE Diagnostics
+        </h2>
+
+        <div className="neu-card-convex p-3 rounded-lg text-center font-mono text-xs text-noorEmerald border border-noorEmerald/30 bg-slate-900/80 shadow-inner">
+          {paper.mathematicalEngine.systemEquation}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs font-mono">
+          <div className="neu-inset p-3 rounded-lg border border-slate-800 bg-slate-950/50 space-y-1">
+            <div className="text-slate-500 text-[10px]">FIM λ_min Eigenvalue</div>
+            <div className="text-noorEmerald font-bold text-sm">{paper.mathematicalEngine.fimEigenvalue}</div>
+            <div className="text-[10px] text-slate-400">{paper.mathematicalEngine.identifiabilityStatus}</div>
           </div>
 
-          <div className="space-y-3 font-mono text-xs">
-            <h3 className="font-bold text-slate-200">Layer 1 Profile Likelihood & Fisher Information Matrix (FIM):</h3>
-            <div className="neu-inset p-3 rounded-lg space-y-2">
-              <p className="text-slate-300">
-                • Computes FIM eigenvalues &lambda;_i of I(&Theta;). If min(&lambda;_i) &lt; 1.0e-3, flags system as unidentifiable and emits explicit warning alert.
-              </p>
-              <p className="text-noorEmerald font-bold">
-                • Evaluates 95% Confidence Intervals for kinetic rates (k_kill_rate, t_differentiation_rate) with thermodynamic biological bounds penalty R_bio(&Theta;).
-              </p>
+          <div className="neu-inset p-3 rounded-lg border border-slate-800 bg-slate-950/50 space-y-1">
+            <div className="text-slate-500 text-[10px]">Diffusion Coefficient (D_m)</div>
+            <div className="text-cyanCore font-bold text-sm">{paper.mathematicalEngine.pdeParameters.diffusionD_m}</div>
+            <div className="text-[10px] text-slate-400">Extracellular Matrix</div>
+          </div>
+
+          <div className="neu-inset p-3 rounded-lg border border-slate-800 bg-slate-950/50 space-y-1">
+            <div className="text-slate-500 text-[10px]">Chemotactic Drift (μ)</div>
+            <div className="text-amber-400 font-bold text-sm">{paper.mathematicalEngine.pdeParameters.chemotacticDrift}</div>
+            <div className="text-[10px] text-slate-400">Morphogen Gradient</div>
+          </div>
+
+          <div className="neu-inset p-3 rounded-lg border border-slate-800 bg-slate-950/50 space-y-1">
+            <div className="text-slate-500 text-[10px]">Continuum Stress (σ)</div>
+            <div className="text-emerald-400 font-bold text-sm">{paper.mathematicalEngine.pdeParameters.tissueStress}</div>
+            <div className="text-[10px] text-slate-400">Biomechanical Load</div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Benchmark Audit Metrics */}
+      <div className="space-y-3 border-t border-convexBorder pt-4">
+        <h2 className="text-xs font-bold text-cyanCore uppercase tracking-wider font-mono flex items-center gap-2">
+          <Activity className="w-4 h-4 text-cyanCore" />
+          3. Scientific Benchmark Audit & Baseline Comparison
+        </h2>
+
+        <div className="overflow-x-auto neu-inset rounded-xl border border-slate-800">
+          <table className="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-900 text-slate-300 border-b border-convexBorder font-mono">
+                <th className="p-3">Benchmark Metric Name</th>
+                <th className="p-3">CellNoor Digital Twin Score</th>
+                <th className="p-3">Standard Baseline</th>
+                <th className="p-3">Net Superiority Improvement</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-convexBorder font-mono">
+              {paper.benchmarkMetrics.map((bench, idx) => (
+                <tr key={idx} className="hover:bg-slate-900/40 transition-colors">
+                  <td className="p-3 text-slate-200 font-bold">{bench.name}</td>
+                  <td className="p-3 text-noorEmerald font-bold">{bench.cellNoorScore}</td>
+                  <td className="p-3 text-slate-400">{bench.standardBaseline}</td>
+                  <td className="p-3 text-noorEmerald font-bold flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-noorEmerald shrink-0" />
+                    <span>{bench.netSuperiority}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 5. Regulatory Audit & Multi-Omics Evidence Graph */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-convexBorder pt-4">
+        {/* Regulatory Audit */}
+        <div className="neu-card-convex p-4 rounded-xl space-y-3 border border-convexBorder bg-slate-900/60 font-mono text-xs">
+          <div className="flex items-center justify-between border-b border-convexBorder pb-2">
+            <h3 className="text-slate-200 font-bold flex items-center gap-1.5 uppercase tracking-wider">
+              <ShieldCheck className="w-4 h-4 text-noorEmerald" />
+              Regulatory Safety Audit Gate
+            </h3>
+            <span
+              className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                paper.regulatoryAudit.teratomaStatus === 'PASS'
+                  ? 'bg-noorEmerald/20 text-noorEmerald border border-noorEmerald/40'
+                  : 'bg-red-500/20 text-red-400 border border-red-400/40'
+              }`}
+            >
+              {paper.regulatoryAudit.teratomaStatus}
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between text-slate-300">
+              <span className="text-slate-400">Sample Accession ID:</span>
+              <span className="text-cyanCore font-bold">{paper.regulatoryAudit.sampleId}</span>
+            </div>
+            <div className="flex justify-between text-slate-300">
+              <span className="text-slate-400">FDA Teratoma Hazard (S_teratoma):</span>
+              <span className="text-noorEmerald font-bold">{paper.regulatoryAudit.teratomaScore}</span>
+            </div>
+            <div className="flex justify-between text-slate-300">
+              <span className="text-slate-400">Karyotype Instability:</span>
+              <span className="text-slate-200">{paper.regulatoryAudit.karyotypeScore}</span>
+            </div>
+            <div className="flex justify-between text-slate-300">
+              <span className="text-slate-400">Differential Vulnerability (DVR):</span>
+              <span className="text-noorEmerald font-bold">{paper.regulatoryAudit.dvrSelectivity}</span>
+            </div>
+            <div className="text-[11px] text-noorEmerald bg-noorEmerald/10 p-2 rounded border border-noorEmerald/20 text-center font-bold">
+              {paper.regulatoryAudit.normalSelectivityStatus}
             </div>
           </div>
         </div>
-      )}
 
-      {/* PAPER 3: FDA TERATOMA & SAFETY GATE */}
-      {activePaper === 'teratoma' && (
-        <div className="space-y-6">
-          <div className="border-b border-convexBorder pb-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-amber-400/20 text-amber-400 border border-amber-400/40">
-                TECHNICAL WHITE PAPER #3 — LAYER 3 SAFETY GATE
-              </span>
-              <span className="text-xs font-mono text-slate-400">Published: October 2026</span>
-            </div>
-            <h1 className="text-xl md:text-2xl font-black text-slate-100 tracking-wide">
-              Quantifying Residual Pluripotency Hazard (S_teratoma) & Genomic Instability
-            </h1>
-            <div className="text-xs font-mono text-slate-400 space-y-0.5">
-              <p><strong>Regulatory Authority:</strong> FDA CBER Cell & Gene Therapy Safety Standards</p>
-              <p><strong>Gating Engine:</strong> Teratoma Hazard Classifier & Karyotypic Drift Tracking</p>
-            </div>
-          </div>
+        {/* Evidence Graph */}
+        <div className="neu-card-convex p-4 rounded-xl space-y-3 border border-convexBorder bg-slate-900/60 font-mono text-xs">
+          <h3 className="text-slate-200 font-bold flex items-center gap-1.5 uppercase tracking-wider border-b border-convexBorder pb-2">
+            <Compass className="w-4 h-4 text-cyanCore" />
+            Multi-Omics Why-Graph Evidence Card
+          </h3>
 
-          <div className="neu-inset p-4 rounded-xl space-y-2 border border-slate-800 bg-slate-950/60 text-xs text-slate-300">
-            <h2 className="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-amber-400" />
-              FDA CBER Teratoma Gating Formula
-            </h2>
-            <div className="neu-card-convex p-3 rounded-lg text-center font-mono text-xs text-amber-400 border border-amber-400/30">
-              S_teratoma = (1 / |G_pluri|) &sum; [ R_g(t_final) / R_g,iPSC ]
-            </div>
-            <p className="leading-relaxed pt-2">
-              Evaluated over pluripotency marker set G_pluri = &#123;POU5F1, SOX2, NANOG, LIN28A, ZFP42&#125;. If S_teratoma &gt; 1.00e-04, protocol is automatically rejected with <strong>HIGH_RISK_REJECTED</strong>.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* PAPER 4: STEM CELL REGENERA PACKS */}
-      {activePaper === 'regenera' && (
-        <div className="space-y-6">
-          <div className="border-b border-convexBorder pb-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-emerald-400/20 text-emerald-400 border border-emerald-400/40">
-                TECHNICAL WHITE PAPER #4 — REGENERA DISEASE PACKS
-              </span>
-              <span className="text-xs font-mono text-slate-400">Published: October 2026</span>
-            </div>
-            <h1 className="text-xl md:text-2xl font-black text-slate-100 tracking-wide">
-              Biomanufacturing & Spatio-Temporal Microenvironments for Regenerative Cell Therapies
-            </h1>
-            <div className="text-xs font-mono text-slate-400 space-y-0.5">
-              <p><strong>Indications:</strong> Pancreatic Islets (T1D), Corneal Limbal Repair, Cardiac Patch Integration</p>
-              <p><strong>Modules:</strong> Bioreactor Yield Twin, Hypoimmune B2M/CIITA KO, Purity Deconvolution</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
-            <div className="neu-inset p-3 rounded-lg space-y-1">
-              <div className="text-noorEmerald font-bold">Type 1 Diabetes Islets:</div>
-              <div className="text-slate-300">• Glucose-stimulated insulin secretion (GSIS) modeling.</div>
-              <div className="text-slate-300">• Hypoimmune evasion (B2M KO + CD47 overexpression).</div>
+          <div className="space-y-2">
+            <div>
+              <div className="text-noorEmerald font-bold text-[11px] mb-1">Supporting Evidence [E1-E3]:</div>
+              {paper.evidenceGraph.supporting.map((sup, idx) => (
+                <div key={idx} className="text-slate-300 text-[11px] flex items-start gap-1">
+                  <span className="text-noorEmerald">•</span>
+                  <span>{sup}</span>
+                </div>
+              ))}
             </div>
 
-            <div className="neu-inset p-3 rounded-lg space-y-1">
-              <div className="text-cyanCore font-bold">Corneal Limbal Epithelium:</div>
-              <div className="text-slate-300">• Viscoelastic chemotaxis across limbal niche.</div>
-              <div className="text-slate-300">• Corneal opacity & re-epithelialization yield.</div>
-            </div>
+            {paper.evidenceGraph.contradicting.length > 0 && (
+              <div>
+                <div className="text-amber-400 font-bold text-[11px] mb-1">Contradicting / Boundary Signals [E1]:</div>
+                {paper.evidenceGraph.contradicting.map((con, idx) => (
+                  <div key={idx} className="text-slate-300 text-[11px] flex items-start gap-1">
+                    <span className="text-amber-400">•</span>
+                    <span>{con}</span>
+                  </div>
+                ))}
+              </div>
+            )}
 
-            <div className="neu-inset p-3 rounded-lg space-y-1">
-              <div className="text-amber-400 font-bold">Cardiac Patch Integration:</div>
-              <div className="text-slate-300">• Electromechanical coupling & stress tensor &sigma;.</div>
-              <div className="text-slate-300">• Arrhythmia risk & extracellular matrix energy E_ECM.</div>
+            <div className="pt-1 border-t border-slate-800">
+              <div className="text-slate-500 text-[10px]">Weakest Operational Link:</div>
+              <div className="text-slate-300 text-[11px] italic">{paper.evidenceGraph.weakestLink}</div>
             </div>
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Ecosystem Footer */}
+      <div className="border-t border-convexBorder pt-4 flex flex-col md:flex-row items-center justify-between text-xs font-mono text-slate-500 gap-2">
+        <div>
+          Horizon Commerce LLC (Lorton, VA; UEI: <span className="text-cyanCore">NY9AHGK2BBZ7</span>) | License Clearance: Commercial Verified
+        </div>
+        <div className="text-noorEmerald font-semibold">
+          NoorGenX Ecosystem (amjad@noorgenx.com)
+        </div>
+      </div>
     </div>
   );
 }
