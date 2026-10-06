@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Only backend services or authenticated admin can view the entire lead list
+    match /leads/{leadId} {
+      allow read: if request.auth != null && request.auth.token.email == 'amjad@noorgenx.com';
+      allow write: if true; // Allows prospective leads to record downloads
+    }
+    
+    // Aggregated telemetry is readable for dashboard display, writable for download increments
+    match /dossier_telemetry/{paperId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Audit logs are append-only
+    match /download_events/{eventId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null && request.auth.token.email == 'amjad@noorgenx.com';
+    }
+  }
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FileText,
   ShieldCheck,
@@ -11,7 +11,6 @@ import {
   Activity,
   Download,
   CheckCircle2,
-  AlertTriangle,
   FileSpreadsheet,
   TrendingUp,
   Brain,
@@ -21,14 +20,35 @@ import {
   Sparkles,
   ChevronRight,
   BookOpen,
+  UserCheck,
+  RefreshCw,
 } from 'lucide-react';
 import { WHITE_PAPERS, WhitePaperData } from '../constants/whitePapers';
+import { LeadProfile, recordDossierDownload } from '../lib/firebaseDossier';
+import LeadCaptureModal from './LeadCaptureModal';
 
 export default function WhitePaperView() {
   const [selectedId, setSelectedId] = useState<string>('bone_marrow_aml');
   const [isExporting, setIsExporting] = useState<boolean>(false);
+  const [isLeadModalOpen, setIsLeadModalOpen] = useState<boolean>(false);
+  const [pendingFormat, setPendingFormat] = useState<'pdf' | 'docx' | 'txt' | null>(null);
+  const [cachedLead, setCachedLead] = useState<LeadProfile | null>(null);
 
   const paper: WhitePaperData = WHITE_PAPERS[selectedId] || WHITE_PAPERS['bone_marrow_aml'];
+
+  // Check localStorage for lead profile on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('cellnoor_lead_profile');
+      if (stored) {
+        try {
+          setCachedLead(JSON.parse(stored));
+        } catch (e) {
+          console.warn('Failed to parse cached lead profile');
+        }
+      }
+    }
+  }, []);
 
   // Helper icons for categories
   const getLineageIcon = (id: string) => {
@@ -56,8 +76,8 @@ export default function WhitePaperView() {
     }
   };
 
-  // Export 1: Download PDF Dossier via API
-  const handleExportPdf = async () => {
+  // Direct Stream Handlers
+  const streamPdf = async () => {
     setIsExporting(true);
     try {
       const response = await fetch('http://localhost:8080/api/v1/dossier/pdf', {
@@ -87,15 +107,13 @@ export default function WhitePaperView() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.warn('Backend API fallback triggered for PDF download:', err);
-      // Fallback text download if API unreachable
-      handleExportTxt();
+      streamTxt();
     } finally {
       setIsExporting(false);
     }
   };
 
-  // Export 2: Download Word Document (.docx / HTML blob)
-  const handleExportDocx = () => {
+  const streamDocx = () => {
     const htmlContent = `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
       <head>
@@ -210,8 +228,7 @@ export default function WhitePaperView() {
     window.URL.revokeObjectURL(url);
   };
 
-  // Export 3: Download Plain Text Dossier (.txt)
-  const handleExportTxt = () => {
+  const streamTxt = () => {
     const txtContent = `
 ================================================================================
 CELLNOOR TECHNICAL WHITE PAPER & CLINICAL DOSSIER
@@ -289,20 +306,93 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
     window.URL.revokeObjectURL(url);
   };
 
+  const executeDownloadStream = (format: 'pdf' | 'docx' | 'txt') => {
+    if (format === 'pdf') streamPdf();
+    else if (format === 'docx') streamDocx();
+    else if (format === 'txt') streamTxt();
+  };
+
+  // Unified Lead Gate Export Handler
+  const handleExportClick = async (format: 'pdf' | 'docx' | 'txt') => {
+    const storedLead = localStorage.getItem('cellnoor_lead_profile');
+    if (!storedLead) {
+      setPendingFormat(format);
+      setIsLeadModalOpen(true);
+      return;
+    }
+
+    try {
+      const lead: LeadProfile = JSON.parse(storedLead);
+      setCachedLead(lead);
+      // Record download telemetry in Firebase
+      await recordDossierDownload(lead, paper.id, paper.title, format);
+    } catch (e) {
+      console.warn('Telemetry error fallback:', e);
+    } finally {
+      executeDownloadStream(format);
+    }
+  };
+
+  const handleClearLeadIdentity = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('cellnoor_lead_profile');
+      setCachedLead(null);
+    }
+  };
+
   return (
     <div className="neu-card p-6 border border-convexBorder rounded-xl space-y-6 max-w-6xl mx-auto my-4 text-slate-200">
+      {/* Lead Capture Modal */}
+      {pendingFormat && (
+        <LeadCaptureModal
+          isOpen={isLeadModalOpen}
+          onClose={() => {
+            setIsLeadModalOpen(false);
+            setPendingFormat(null);
+          }}
+          paperId={paper.id}
+          paperTitle={paper.title}
+          exportFormat={pendingFormat}
+          onSuccessDownload={(lead) => {
+            setCachedLead(lead);
+            if (pendingFormat) {
+              executeDownloadStream(pendingFormat);
+            }
+          }}
+        />
+      )}
+
       {/* Lineage Selector Bar */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-cyanCore" />
             <h2 className="text-sm font-bold text-slate-100 uppercase tracking-wider font-mono">
               Enterprise Multi-Lineage Technical White Paper & Clinical Dossier Suite
             </h2>
           </div>
-          <span className="text-xs font-mono text-slate-400">
-            9 Target Domains Active
-          </span>
+
+          {/* Lead Authentication Badge */}
+          {cachedLead ? (
+            <div className="flex items-center gap-2 text-xs font-mono bg-noorEmerald/10 text-noorEmerald border border-noorEmerald/30 px-2.5 py-1 rounded-lg">
+              <UserCheck className="w-3.5 h-3.5 text-noorEmerald" />
+              <span>
+                Verified: <strong>{cachedLead.email}</strong> ({cachedLead.jobRole})
+              </span>
+              <button
+                onClick={handleClearLeadIdentity}
+                title="Switch Lead Profile"
+                className="text-slate-400 hover:text-slate-200 ml-1 border-l border-noorEmerald/30 pl-1.5 flex items-center gap-0.5"
+              >
+                <RefreshCw className="w-3 h-3 text-slate-400" />
+              </button>
+            </div>
+          ) : (
+            <span className="text-xs font-mono text-cyanCore flex items-center gap-1 bg-cyanCore/10 px-2.5 py-1 rounded-lg border border-cyanCore/30">
+              <ShieldCheck className="w-3.5 h-3.5 text-cyanCore" />
+              B2B Lead-Gen Protected
+            </span>
+          )}
         </div>
 
         {/* 9 Lineage Tabs */}
@@ -347,9 +437,9 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
           {/* Export Tray */}
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={handleExportPdf}
+              onClick={() => handleExportClick('pdf')}
               disabled={isExporting}
-              className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-cyanCore border border-cyanCore/40 flex items-center gap-1.5 transition-all shadow-sm"
+              className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-cyanCore border border-cyanCore/40 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
               title="Download Executive PDF Dossier"
             >
               <Download className="w-3.5 h-3.5 text-cyanCore" />
@@ -357,8 +447,8 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
             </button>
 
             <button
-              onClick={handleExportDocx}
-              className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-noorEmerald border border-noorEmerald/40 flex items-center gap-1.5 transition-all shadow-sm"
+              onClick={() => handleExportClick('docx')}
+              className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-noorEmerald border border-noorEmerald/40 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
               title="Download Word Document"
             >
               <FileSpreadsheet className="w-3.5 h-3.5 text-noorEmerald" />
@@ -366,8 +456,8 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
             </button>
 
             <button
-              onClick={handleExportTxt}
-              className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-convexBorder flex items-center gap-1.5 transition-all shadow-sm"
+              onClick={() => handleExportClick('txt')}
+              className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-convexBorder flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
               title="Download Plain Text Dossier"
             >
               <FileText className="w-3.5 h-3.5 text-slate-400" />
