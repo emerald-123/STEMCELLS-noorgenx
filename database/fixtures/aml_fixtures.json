@@ -1,0 +1,41 @@
+{
+  "datasets": [
+    {
+      "accession": "GSE228325",
+      "name": "Beat AML Menin-Inhibitor Combination Series",
+      "samples_count": 48,
+      "mutational_profile": {
+        "NPM1": "mutated",
+        "KMT2A": "rearranged",
+        "MEN1": "M327I_escape_clone",
+        "FLT3": "ITD"
+      },
+      "cell_states": {
+        "S1_NORMAL_HSC": 0.10,
+        "S2_LSC_PERSISTENT": 0.45,
+        "S3_PROGENITOR_BLAST": 0.35,
+        "S4_DIFFERENTIATED": 0.08,
+        "S5_RESISTANT_ESCAPE": 0.02
+      }
+    },
+    {
+      "accession": "HCA_BM_CD34",
+      "name": "Human Cell Atlas Healthy Cord Blood CD34+ Reference",
+      "samples_count": 120,
+      "pluripotency_baselines": {
+        "POU5F1": 0.0,
+        "SOX2": 0.0,
+        "NANOG": 0.0,
+        "LIN28A": 0.0,
+        "ZFP42": 0.0
+      },
+      "target_expression_tpm": {
+        "MEN1": 4.2,
+        "KMT2A": 3.8,
+        "HOXA9": 0.4,
+        "MEIS1": 0.3,
+        "KAT6A": 0.8
+      }
+    }
+  ]
+}
