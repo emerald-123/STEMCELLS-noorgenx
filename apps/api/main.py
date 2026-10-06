@@ -28,12 +28,15 @@ from packages.evidence_graph import EvidenceGraphEngine, DynamicPDFDossierGenera
 from packages.model_registry import ModelRegistryGateway
 from packages.core_sdk import CoreSDKClient
 from workflows.aml_menin import AMLMeninWorkflowPipeline
+from apps.api.routers.billing import router as billing_router
 
 app = FastAPI(
     title="CellNoor API",
     description="Computational backend for CellNoor (v2.0 AML Flagship) research environment",
     version="2.0.0",
 )
+
+app.include_router(billing_router)
 
 app.add_middleware(
     CORSMiddleware,

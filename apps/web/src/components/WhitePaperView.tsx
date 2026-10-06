@@ -22,30 +22,68 @@ import {
   BookOpen,
   UserCheck,
   RefreshCw,
+  CreditCard,
+  Lock,
 } from 'lucide-react';
 import { WHITE_PAPERS, WhitePaperData } from '../constants/whitePapers';
 import { LeadProfile, recordDossierDownload } from '../lib/firebaseDossier';
 import LeadCaptureModal from './LeadCaptureModal';
+import CheckoutModal from './CheckoutModal';
 
 export default function WhitePaperView() {
   const [selectedId, setSelectedId] = useState<string>('bone_marrow_aml');
   const [isExporting, setIsExporting] = useState<boolean>(false);
+
+  // Lead Modal & Checkout Modal state
   const [isLeadModalOpen, setIsLeadModalOpen] = useState<boolean>(false);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState<boolean>(false);
   const [pendingFormat, setPendingFormat] = useState<'pdf' | 'docx' | 'txt' | null>(null);
   const [cachedLead, setCachedLead] = useState<LeadProfile | null>(null);
+  const [unlockedPapers, setUnlockedPapers] = useState<string[]>([]);
+  const [checkoutNotification, setCheckoutNotification] = useState<string | null>(null);
 
   const paper: WhitePaperData = WHITE_PAPERS[selectedId] || WHITE_PAPERS['bone_marrow_aml'];
 
-  // Check localStorage for lead profile on mount
+  // Check localStorage and URL query params on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('cellnoor_lead_profile');
-      if (stored) {
+      // 1. Load lead profile
+      const storedLead = localStorage.getItem('cellnoor_lead_profile');
+      if (storedLead) {
         try {
-          setCachedLead(JSON.parse(stored));
+          setCachedLead(JSON.parse(storedLead));
         } catch (e) {
           console.warn('Failed to parse cached lead profile');
         }
+      }
+
+      // 2. Load unlocked papers
+      const storedUnlocked = localStorage.getItem('cellnoor_unlocked_papers');
+      let unlockedList: string[] = [];
+      if (storedUnlocked) {
+        try {
+          unlockedList = JSON.parse(storedUnlocked);
+          setUnlockedPapers(unlockedList);
+        } catch (e) {
+          console.warn('Failed to parse unlocked papers');
+        }
+      }
+
+      // 3. Handle URL Checkout Callback (Stripe / PayPal return)
+      const params = new URLSearchParams(window.location.search);
+      const unlockedParam = params.get('unlocked');
+      const formatParam = (params.get('format') as 'pdf' | 'docx' | 'txt') || 'pdf';
+      const sessionId = params.get('session_id') || params.get('paypal_order');
+
+      if (unlockedParam) {
+        if (!unlockedList.includes(unlockedParam)) {
+          unlockedList.push(unlockedParam);
+          localStorage.setItem('cellnoor_unlocked_papers', JSON.stringify(unlockedList));
+          setUnlockedPapers([...unlockedList]);
+        }
+        setSelectedId(unlockedParam);
+        setCheckoutNotification(`Entitlement verified! Single Clinical Dossier Unlocked ($495.00). Ref: ${sessionId || 'APPROVED'}`);
+        executeDownloadStream(formatParam);
       }
     }
   }, []);
@@ -312,24 +350,28 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
     else if (format === 'txt') streamTxt();
   };
 
-  // Unified Lead Gate Export Handler
+  // Unified Lead Gate & Checkout Handler
   const handleExportClick = async (format: 'pdf' | 'docx' | 'txt') => {
+    setPendingFormat(format);
+
+    // 1. Check if lead profile exists
     const storedLead = localStorage.getItem('cellnoor_lead_profile');
     if (!storedLead) {
-      setPendingFormat(format);
       setIsLeadModalOpen(true);
       return;
     }
 
-    try {
-      const lead: LeadProfile = JSON.parse(storedLead);
-      setCachedLead(lead);
-      // Record download telemetry in Firebase
+    const lead: LeadProfile = JSON.parse(storedLead);
+    setCachedLead(lead);
+
+    // 2. Check if paper is already unlocked in entitlements
+    const isUnlocked = unlockedPapers.includes(paper.id);
+    if (isUnlocked) {
       await recordDossierDownload(lead, paper.id, paper.title, format);
-    } catch (e) {
-      console.warn('Telemetry error fallback:', e);
-    } finally {
       executeDownloadStream(format);
+    } else {
+      // Prompt Checkout Modal for $495 transaction
+      setIsCheckoutModalOpen(true);
     }
   };
 
@@ -340,8 +382,36 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
     }
   };
 
+  const handleSuccessfulPayment = () => {
+    const updated = [...unlockedPapers, paper.id];
+    setUnlockedPapers(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cellnoor_unlocked_papers', JSON.stringify(updated));
+    }
+    if (cachedLead && pendingFormat) {
+      recordDossierDownload(cachedLead, paper.id, paper.title, pendingFormat);
+      executeDownloadStream(pendingFormat);
+    }
+  };
+
   return (
     <div className="neu-card p-6 border border-convexBorder rounded-xl space-y-6 max-w-6xl mx-auto my-4 text-slate-200">
+      {/* Checkout Notification Bar */}
+      {checkoutNotification && (
+        <div className="bg-noorEmerald/20 border border-noorEmerald/40 text-noorEmerald font-mono text-xs p-3 rounded-xl flex items-center justify-between animate-pulse">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-noorEmerald" />
+            <span>{checkoutNotification}</span>
+          </div>
+          <button
+            onClick={() => setCheckoutNotification(null)}
+            className="text-slate-400 hover:text-slate-200 text-xs"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Lead Capture Modal */}
       {pendingFormat && (
         <LeadCaptureModal
@@ -355,10 +425,26 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
           exportFormat={pendingFormat}
           onSuccessDownload={(lead) => {
             setCachedLead(lead);
-            if (pendingFormat) {
-              executeDownloadStream(pendingFormat);
-            }
+            setIsLeadModalOpen(false);
+            // After lead capture, open checkout modal for monetization
+            setIsCheckoutModalOpen(true);
           }}
+        />
+      )}
+
+      {/* Stripe & PayPal Checkout Modal ($495) */}
+      {pendingFormat && cachedLead && (
+        <CheckoutModal
+          isOpen={isCheckoutModalOpen}
+          onClose={() => {
+            setIsCheckoutModalOpen(false);
+            setPendingFormat(null);
+          }}
+          paperId={paper.id}
+          paperTitle={paper.title}
+          leadEmail={cachedLead.email}
+          format={pendingFormat}
+          onSuccessPayment={handleSuccessfulPayment}
         />
       )}
 
@@ -372,7 +458,7 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
             </h2>
           </div>
 
-          {/* Lead Authentication Badge */}
+          {/* Lead Authentication & Payment Entitlement Badge */}
           {cachedLead ? (
             <div className="flex items-center gap-2 text-xs font-mono bg-noorEmerald/10 text-noorEmerald border border-noorEmerald/30 px-2.5 py-1 rounded-lg">
               <UserCheck className="w-3.5 h-3.5 text-noorEmerald" />
@@ -390,7 +476,7 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
           ) : (
             <span className="text-xs font-mono text-cyanCore flex items-center gap-1 bg-cyanCore/10 px-2.5 py-1 rounded-lg border border-cyanCore/30">
               <ShieldCheck className="w-3.5 h-3.5 text-cyanCore" />
-              B2B Lead-Gen Protected
+              Stripe & PayPal Gate Active ($495 / dossier)
             </span>
           )}
         </div>
@@ -399,6 +485,7 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
           {Object.values(WHITE_PAPERS).map((item) => {
             const isSelected = item.id === selectedId;
+            const isUnlocked = unlockedPapers.includes(item.id);
             return (
               <button
                 key={item.id}
@@ -411,6 +498,11 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
               >
                 {getLineageIcon(item.id)}
                 <span>{item.category.split(' ')[0]}</span>
+                {isUnlocked ? (
+                  <CheckCircle2 className="w-3 h-3 text-noorEmerald shrink-0" />
+                ) : (
+                  <Lock className="w-3 h-3 text-slate-500 shrink-0" />
+                )}
               </button>
             );
           })}
@@ -428,6 +520,11 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
               <span className="text-xs font-mono text-slate-400">
                 Published: {paper.publishedDate}
               </span>
+              {unlockedPapers.includes(paper.id) && (
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-noorEmerald/20 text-noorEmerald border border-noorEmerald/40 uppercase">
+                  UNLOCKED
+                </span>
+              )}
             </div>
             <h1 className="text-xl md:text-2xl font-black text-slate-100 tracking-wide">
               {paper.title}
