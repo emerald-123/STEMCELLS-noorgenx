@@ -193,6 +193,7 @@ class DynamicPDFDossierGenerator:
             f"<b>Continuum Biomechanics Stress (&sigma;):</b> {pde_stress_sigma:.4f} kPa<br/>"
             f"<b>Chemotactic Velocity Drift Vector:</b> {pde_velocity_vector}<br/>"
             f"<b>Multi-Tissue Pipeline Metrics:</b><br/>"
+            f"&nbsp;&bull; <b>Pulmonary (Alveolar Type II AT2):</b> SFTPC+ Progenitors Dispersed Across Alveolar Basement Membrane @ t &gt; 34h (&sigma; = 0.3623 kPa, Pulmonary Fibrosis Repair Benchmark)<br/>"
             f"&nbsp;&bull; <b>Musculoskeletal (Osteochondral Defect):</b> Mesenchymal Stromal Chondrogenic Condensation Nodules Clustered @ t &gt; 37h (&sigma; = 1.1221 kPa, Autologous Chondrocyte Implantation / MACI Benchmark)<br/>"
             f"&nbsp;&bull; <b>Auditory (Cochlear Hair Cell):</b> Lgr5+ Otic Progenitors Aligned @ t &gt; 30h (&sigma; = 0.1411 kPa, FX-322 Progenitor Activation Benchmark)<br/>"
             f"&nbsp;&bull; <b>Neuro (Putamen Dopaminergic):</b> Midbrain DA Progenitors Dispersed @ t &gt; 21h (&sigma; = 0.2238 kPa, Amchepry Sumitomo iPSC Benchmark)<br/>"
