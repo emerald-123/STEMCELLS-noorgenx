@@ -11,8 +11,8 @@ export const NoorGenXLogo: React.FC<NoorGenXLogoProps> = ({
   height = 36,
   priority = true,
 }) => {
-  // Original aspect ratio of the NoorGenX trademark logo is approximately 3.63 : 1
-  const width = Math.round(height * 3.63);
+  // Original aspect ratio of the NoorGenX trademark logo is approximately 3.99 : 1
+  const width = Math.round(height * 3.99);
 
   return (
     <div className={`inline-flex items-center select-none ${className}`}>
