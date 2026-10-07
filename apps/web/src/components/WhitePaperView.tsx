@@ -46,50 +46,6 @@ export default function WhitePaperView() {
 
   const paper: WhitePaperData = WHITE_PAPERS[selectedId] || WHITE_PAPERS['bone_marrow_aml'];
 
-  // Check localStorage and URL query params on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // 1. Load lead profile
-      const storedLead = localStorage.getItem('cellnoor_lead_profile');
-      if (storedLead) {
-        try {
-          setCachedLead(JSON.parse(storedLead));
-        } catch (e) {
-          console.warn('Failed to parse cached lead profile');
-        }
-      }
-
-      // 2. Load unlocked papers
-      const storedUnlocked = localStorage.getItem('cellnoor_unlocked_papers');
-      let unlockedList: string[] = [];
-      if (storedUnlocked) {
-        try {
-          unlockedList = JSON.parse(storedUnlocked);
-          setUnlockedPapers(unlockedList);
-        } catch (e) {
-          console.warn('Failed to parse unlocked papers');
-        }
-      }
-
-      // 3. Handle URL Checkout Callback (Stripe / PayPal return)
-      const params = new URLSearchParams(window.location.search);
-      const unlockedParam = params.get('unlocked');
-      const formatParam = (params.get('format') as 'pdf' | 'docx' | 'txt') || 'pdf';
-      const sessionId = params.get('session_id') || params.get('paypal_order');
-
-      if (unlockedParam) {
-        if (!unlockedList.includes(unlockedParam)) {
-          unlockedList.push(unlockedParam);
-          localStorage.setItem('cellnoor_unlocked_papers', JSON.stringify(unlockedList));
-          setUnlockedPapers([...unlockedList]);
-        }
-        setSelectedId(unlockedParam);
-        setCheckoutNotification(`Entitlement verified! Single Clinical Dossier Unlocked ($495.00). Ref: ${sessionId || 'APPROVED'}`);
-        executeDownloadStream(formatParam);
-      }
-    }
-  }, []);
-
   // Helper icons for categories
   const getLineageIcon = (id: string) => {
     switch (id) {
@@ -350,6 +306,50 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
     else if (format === 'docx') streamDocx();
     else if (format === 'txt') streamTxt();
   };
+
+  // Check localStorage and URL query params on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // 1. Load lead profile
+      const storedLead = localStorage.getItem('cellnoor_lead_profile');
+      if (storedLead) {
+        try {
+          setCachedLead(JSON.parse(storedLead));
+        } catch (e) {
+          console.warn('Failed to parse cached lead profile');
+        }
+      }
+
+      // 2. Load unlocked papers
+      const storedUnlocked = localStorage.getItem('cellnoor_unlocked_papers');
+      let unlockedList: string[] = [];
+      if (storedUnlocked) {
+        try {
+          unlockedList = JSON.parse(storedUnlocked);
+          setUnlockedPapers(unlockedList);
+        } catch (e) {
+          console.warn('Failed to parse unlocked papers');
+        }
+      }
+
+      // 3. Handle URL Checkout Callback (Stripe / PayPal return)
+      const params = new URLSearchParams(window.location.search);
+      const unlockedParam = params.get('unlocked');
+      const formatParam = (params.get('format') as 'pdf' | 'docx' | 'txt') || 'pdf';
+      const sessionId = params.get('session_id') || params.get('paypal_order');
+
+      if (unlockedParam) {
+        if (!unlockedList.includes(unlockedParam)) {
+          unlockedList.push(unlockedParam);
+          localStorage.setItem('cellnoor_unlocked_papers', JSON.stringify(unlockedList));
+          setUnlockedPapers([...unlockedList]);
+        }
+        setSelectedId(unlockedParam);
+        setCheckoutNotification(`Entitlement verified! Single Clinical Dossier Unlocked ($495.00). Ref: ${sessionId || 'APPROVED'}`);
+        executeDownloadStream(formatParam);
+      }
+    }
+  }, []);
 
   // Unified Lead Gate & Checkout Handler
   const handleExportClick = async (format: 'pdf' | 'docx' | 'txt') => {
