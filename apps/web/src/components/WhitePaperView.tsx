@@ -816,7 +816,7 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
         </div>
 
         {/* Figure 1: 2D Synergy Surface */}
-        <SynergyHeatmapPreview />
+        <SynergyHeatmapPreview paper={paper} />
       </div>
 
       {/* 3. Mathematical Engine & PDE Diagnostics */}
@@ -858,8 +858,8 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
 
         {/* Embedded Charts: ODE Kinetics + UMAP Trajectory */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <ODETimeSeriesChart />
-          <UMAPEmbeddingFigure />
+          <ODETimeSeriesChart paper={paper} />
+          <UMAPEmbeddingFigure paper={paper} />
         </div>
 
         {/* Tissue Physical Transport Parameters Table */}

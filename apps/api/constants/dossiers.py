@@ -2,6 +2,7 @@
 
 DOSSIER_DATA = {
     "hematology": {
+        "is_oncology": True,
         "id": "bone_marrow_aml",
         "title": "ONCOLOGY / AML FLAGSHIP TARGET VALIDATION DOSSIER",
         "category": "ONCOLOGY / AML FLAGSHIP",
@@ -40,6 +41,7 @@ DOSSIER_DATA = {
         "weakest_link": "In vitro binding affinity under high human serum albumin binding"
     },
     "ophthalmic": {
+        "is_oncology": False,
         "id": "corneal_limbal",
         "title": "OPHTHALMIC LIMBAL STEM CELL REGENERATION DOSSIER",
         "category": "OPHTHALMIC REGENERATIVE MEDICINE",
@@ -78,6 +80,7 @@ DOSSIER_DATA = {
         "weakest_link": "Long-term donor graft stability under severe dry eye ocular surface inflammation"
     },
     "cardiovascular": {
+        "is_oncology": False,
         "id": "cardiac_patch",
         "title": "CARDIOVASCULAR iPSC-CARDIOMYOCYTE SCAFFOLD DOSSIER",
         "category": "CARDIOVASCULAR CELL THERAPY",
@@ -116,6 +119,7 @@ DOSSIER_DATA = {
         "weakest_link": "Coronary perfusion vessel sprouting depth within > 500µm patch thickness"
     },
     "neuro": {
+        "is_oncology": False,
         "id": "putamen_dopaminergic",
         "title": "NEURO / PUTAMEN DOPAMINERGIC RE-INNERVATION DOSSIER",
         "category": "NEURODEGENERATIVE DISEASE REGENERATION",
@@ -154,6 +158,7 @@ DOSSIER_DATA = {
         "weakest_link": "Host microglial neuroinflammation inhibiting neurite outgrowth in advanced PD"
     },
     "endocrine": {
+        "is_oncology": False,
         "id": "pancreatic_islet",
         "title": "ENDOCRINE / PANCREATIC ISLET BETA-PROGENITOR DOSSIER",
         "category": "ENDOCRINE & METABOLIC REGENERATION",
@@ -192,6 +197,7 @@ DOSSIER_DATA = {
         "weakest_link": "Macro-encapsulation retrievability vs micro-encapsulation vascularization trade-off"
     },
     "integumentary": {
+        "is_oncology": False,
         "id": "skin_epidermis",
         "title": "INTEGUMENTARY EPIDERMAL BASAL KERATINOCYTE MIGRATION DOSSIER",
         "category": "INTEGUMENTARY TISSUE ENGINEERING",
@@ -230,6 +236,7 @@ DOSSIER_DATA = {
         "weakest_link": "Perfusion insufficiency in calcified peripheral artery disease patients"
     },
     "auditory": {
+        "is_oncology": False,
         "id": "cochlear_hair_cell",
         "title": "AUDITORY OTIC PROGENITOR & BASILAR MEMBRANE REPAIR DOSSIER",
         "category": "AUDITORY & OTOLARYNGOLOGY REGENERATION",
@@ -268,6 +275,7 @@ DOSSIER_DATA = {
         "weakest_link": "Sustaining stereocilia tip-link structural integrity under acoustic trauma"
     },
     "musculoskeletal": {
+        "is_oncology": False,
         "id": "articular_cartilage",
         "title": "MUSCULOSKELETAL / ARTICULAR CARTILAGE DEFECT REPAIR DOSSIER",
         "category": "MUSCULOSKELETAL & ORTHOPEDIC REGENERATION",
@@ -306,6 +314,7 @@ DOSSIER_DATA = {
         "weakest_link": "Scaffold integration at the avascular tidemark subchondral bone interface"
     },
     "pulmonary": {
+        "is_oncology": False,
         "id": "alveolar_at2",
         "title": "PULMONARY / ALVEOLAR AT2 GAS-EXCHANGE RESURFACING DOSSIER",
         "category": "PULMONARY & RESPIRATORY TISSUE ENGINEERING",
@@ -344,6 +353,7 @@ DOSSIER_DATA = {
         "weakest_link": "Maintaining AT2 progenitor state during ex vivo bioreactor expansion"
     },
     "spinal_cord": {
+        "is_oncology": False,
         "id": "spinal_cord",
         "title": "NEURAL / SPINAL CORD OLIGODENDROCYTE & MOTOR AXON DOSSIER",
         "category": "Neural & Central Nervous System Repair",
