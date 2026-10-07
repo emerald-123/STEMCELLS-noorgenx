@@ -24,6 +24,8 @@ import SynergyHeatmapViewer from './SynergyHeatmapViewer';
 import PatientVcfUploader from './PatientVcfUploader';
 import MultiscalePDEViewer from './MultiscalePDEViewer';
 
+import NoorGenXLogo from './brand/NoorGenXLogo';
+
 export default function CockpitLayout() {
   const [activeTab, setActiveTab] = useState<'simulator' | 'umap' | 'dock' | 'paper' | 'synergy' | 'vcf' | 'pde'>('simulator');
   const [activeNav, setActiveNav] = useState<string>('virtual_lab');
@@ -42,11 +44,7 @@ export default function CockpitLayout() {
       {/* Top Sovereign Bar */}
       <header className="h-14 border-b border-convexBorder bg-slateElevated/90 px-5 flex items-center justify-between z-20">
         <div className="flex items-center gap-3">
-          <img
-            src="/brand/noorgenx-official-logo.png"
-            alt="NoorGenX Ecosystem Logo"
-            className="h-9 w-auto object-contain shrink-0"
-          />
+          <NoorGenXLogo className="h-8" />
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-noorEmerald via-cyanCore to-blue-600 flex items-center justify-center font-black text-slate-950 text-sm shadow-glowEmerald">
             CN
           </div>

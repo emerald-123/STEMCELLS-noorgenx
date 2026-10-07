@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Lock, ArrowRight, X, Building, Mail, User, Briefcase, Sparkles } from 'lucide-react';
 import { LeadProfile, recordDossierDownload } from '../lib/firebaseDossier';
+import NoorGenXLogo from './brand/NoorGenXLogo';
 
 interface LeadCaptureModalProps {
   isOpen: boolean;
@@ -83,11 +84,7 @@ export default function LeadCaptureModal({
         {/* Modal Header */}
         <div className="space-y-2 pr-8">
           <div className="flex items-center gap-2">
-            <img
-              src="/brand/noorgenx-official-logo.png"
-              alt="NoorGenX Logo"
-              className="h-9 w-auto object-contain shrink-0"
-            />
+            <NoorGenXLogo className="h-7" />
             <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyanCore/20 text-cyanCore border border-cyanCore/40 uppercase flex items-center gap-1">
               <Lock className="w-3 h-3 text-cyanCore" />
               Sovereign B2B Lead Access

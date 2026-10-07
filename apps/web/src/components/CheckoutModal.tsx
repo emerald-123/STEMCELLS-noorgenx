@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { CreditCard, DollarSign, ShieldCheck, X, Check, Lock, Sparkles } from 'lucide-react';
 import { API_BASE_URL } from '../lib/apiConfig';
+import NoorGenXLogo from './brand/NoorGenXLogo';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -102,11 +103,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         {/* Header */}
         <div className="space-y-2 pr-6">
           <div className="flex items-center gap-2">
-            <img
-              src="/brand/noorgenx-official-logo.png"
-              alt="NoorGenX Logo"
-              className="h-9 w-auto object-contain shrink-0"
-            />
+            <NoorGenXLogo className="h-7" />
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold font-mono">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span>Commercial Target Validation Dossier</span>
