@@ -105,7 +105,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <img
               src="/brand/noorgenx-logo-white.png"
               alt="NoorGenX Logo"
-              className="h-6 w-auto object-contain shrink-0"
+              className="h-10 w-auto object-contain shrink-0"
             />
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold font-mono">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />

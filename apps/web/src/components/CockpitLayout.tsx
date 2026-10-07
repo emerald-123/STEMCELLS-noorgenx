@@ -45,7 +45,7 @@ export default function CockpitLayout() {
           <img
             src="/brand/noorgenx-logo-white.png"
             alt="NoorGenX Ecosystem Logo"
-            className="h-7 w-auto object-contain shrink-0 rounded"
+            className="h-10 w-auto object-contain shrink-0 rounded"
           />
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-noorEmerald via-cyanCore to-blue-600 flex items-center justify-center font-black text-slate-950 text-sm shadow-glowEmerald">
             CN
