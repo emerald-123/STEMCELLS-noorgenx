@@ -22,6 +22,35 @@ export default function MultiscalePDEViewer() {
   const [paramLoading, setParamLoading] = useState(false);
   const [paramResult, setParamResult] = useState<any>(null);
 
+  useEffect(() => {
+    const handleLineageSync = (e: any) => {
+      const lineageId = e.detail?.lineageId;
+      if (lineageId) {
+        let domainId = lineageId;
+        if (lineageId === 'hematology') domainId = 'bone_marrow_niche';
+        else if (lineageId === 'ophthalmic') domainId = 'corneal_limbal';
+        else if (lineageId === 'integumentary') domainId = 'skin_epidermis';
+        else if (lineageId === 'cardiovascular') domainId = 'cardiac_patch';
+        else if (lineageId === 'endocrine') domainId = 'pancreatic_islet';
+        else if (lineageId === 'neuro') domainId = 'putamen_dopaminergic';
+        else if (lineageId === 'auditory') domainId = 'cochlear_hair_cell';
+        else if (lineageId === 'musculoskeletal') domainId = 'articular_cartilage';
+        else if (lineageId === 'pulmonary') domainId = 'alveolar_at2';
+        else if (lineageId === 'spinal_cord') domainId = 'spinal_cord';
+
+        const found = TISSUE_DOMAINS.find((d) => d.id === domainId);
+        if (found) {
+          setSelectedDomainId(found.id);
+        }
+      }
+    };
+
+    window.addEventListener('cellnoor:lineage_change' as any, handleLineageSync);
+    return () => {
+      window.removeEventListener('cellnoor:lineage_change' as any, handleLineageSync);
+    };
+  }, []);
+
   const activeDomain = TISSUE_DOMAINS.find((d) => d.id === selectedDomainId) || TISSUE_DOMAINS[0];
 
   const handleDomainChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -42,7 +71,15 @@ export default function MultiscalePDEViewer() {
       setYaw(1.0821);  // 62 degrees
       setPitch(0.5760); // 33 degrees
       setNumCells(64);
-    } else if (newId === 'skin_epidermis' || newId === 'bone_marrow_niche' || newId === 'pancreatic_islet') {
+    } else if (newId === 'spinal_cord') {
+      setYaw(0.5235);  // 30 degrees
+      setPitch(0.3490); // 20 degrees
+      setNumCells(64);
+    } else if (newId === 'articular_cartilage' || newId === 'musculoskeletal') {
+      setYaw(2.4086);  // 138 degrees
+      setPitch(1.5010); // 86 degrees
+      setNumCells(64);
+    } else if (newId === 'skin_epidermis' || newId === 'bone_marrow_niche' || newId === 'pancreatic_islet' || newId === 'alveolar_at2' || newId === 'pulmonary') {
       setNumCells(64);
     }
 

@@ -726,4 +726,226 @@ export const WHITE_PAPERS: Record<string, WhitePaperData> = {
       weakestLink: 'Maintaining AT2 progenitor state during ex vivo bioreactor expansion',
     },
   },
+
+  musculoskeletal: {
+    id: 'musculoskeletal',
+    title: 'MUSCULOSKELETAL / ARTICULAR CARTILAGE DEFECT REPAIR DOSSIER',
+    category: 'Musculoskeletal & Orthopedic Regeneration',
+    publishedDate: 'October 2026',
+    indication: 'Full-Thickness Articular Cartilage Defects & Advanced Osteoarthritis',
+    marketSize: '$4.5B+ Global Orthopedic Regenerative Medicine Market',
+    estimatedRoi: '$11M+ Phase 2 Trial Cost Savings via Micro-Shear Scaffold Modeling',
+    executiveSummary:
+      'TGF-beta3 + BMP-7 + IGF-1 tri-morphogen delivery directs chondrogenic MSC condensation without hypertrophic calcification.',
+    clinicalProblem: {
+      title: 'Full-Thickness Articular Cartilage Repair',
+      description:
+        'Articular cartilage has negligible intrinsic repair capacity due to its avascular nature. This white paper presents a continuum biomechanics and morphogen transport model governing Mesenchymal Stromal Cell (MSC) chondrogenic condensation nodules within 3D hydrogel scaffolds.',
+      keyMechanisms: [
+        'SOX9 transcription factor master regulation of chondrogenesis',
+        'RUNX2 suppression to block hypertrophic calcification',
+        'Proteoglycan (Aggrecan) pericellular matrix accumulation under 1.1321 kPa loading',
+      ],
+      cellStateDynamics: [
+        'S1 Mesenchymal Stromal Cell (CD90+/CD105+) -> S2 Chondrogenic Condensation Node',
+        'S2 + TGF-beta3/BMP-7 -> S3 Hyaline Chondrocyte (SOX9+/COL2A1+)',
+        'S3 -> S4 Articular Surface ECM Network (Low COL1A1/COL10A1)',
+      ],
+    },
+    mathematicalEngine: {
+      systemEquation: '∂c/∂t = D_m ∇²c - ∇·(μ c ∇(TGFβ3)) + σ_mechanics ∇·ε',
+      fimEigenvalue: '5.880e-3',
+      identifiabilityStatus: 'IDENTIFIABLE_CONFIRMED',
+      pdeParameters: {
+        diffusionD_m: '0.008 cm²/s',
+        chemotacticDrift: 'μ = 0.006',
+        tissueStress: '1.1321 kPa',
+      },
+    },
+    benchmarkMetrics: [
+      {
+        name: 'Hyaline Cartilage Ratio (COL2A1 / COL1A1)',
+        cellNoorScore: '14.2 Ratio (Hyaline)',
+        standardBaseline: '1.8 Ratio Fibrocartilage',
+        netSuperiority: '+688% Hyaline Purity',
+      },
+      {
+        name: 'Compressive Equilibrium Modulus (E_eq)',
+        cellNoorScore: '0.78 MPa Native Level',
+        standardBaseline: '0.22 MPa Control',
+        netSuperiority: '+254% Stiffness',
+      },
+    ],
+    commercialImpact: [
+      'Cartilage Single-Cell MSC Atlas [E1]',
+      'Autologous Chondrocyte Matrix Trial [E2]',
+      'Micro-shear scaffold modeling de-risks Phase 2 trial',
+    ],
+    regulatoryAudit: {
+      sampleId: 'CARTILAGE_MSC_ATLAS_2026',
+      teratomaScore: '4.12e-06',
+      teratomaStatus: 'PASS',
+      karyotypeScore: '0.04 (STABLE)',
+      dvrSelectivity: '4.55',
+      normalSelectivityStatus: 'PASS (SUBCHONDRAL BONE COMPLIANT)',
+    },
+    evidenceGraph: {
+      supporting: [
+        'Cartilage Single-Cell MSC Atlas [E1]',
+        'Autologous Chondrocyte Matrix Trial [E2]',
+      ],
+      contradicting: [
+        'Transient Type X collagen expression under uncalibrated static compression [E1]',
+      ],
+      weakestLink: 'Scaffold integration at the avascular tidemark subchondral bone interface',
+    },
+  },
+
+  pulmonary: {
+    id: 'pulmonary',
+    title: 'PULMONARY / ALVEOLAR AT2 GAS-EXCHANGE RESURFACING DOSSIER',
+    category: 'Pulmonary & Respiratory Tissue Engineering',
+    publishedDate: 'October 2026',
+    indication: 'Idiopathic Pulmonary Fibrosis (IPF) & ARDS Alveolar Denudation',
+    marketSize: '$3.8B+ Global Pulmonary Regenerative & Anti-Fibrotic Market',
+    estimatedRoi: '$13M+ Reduction in Preclinical Screen Failures via Air-Liquid Interface Modeling',
+    executiveSummary:
+      'FGF7 + CHIR99021 activates SFTPC+ AT2 stem progenitor self-renewal and terminal AT1 flattening across basement membranes.',
+    clinicalProblem: {
+      title: 'AT2-to-AT1 Transdifferentiation Arrest & Fibrotic Scarring',
+      description:
+        'Catastrophic loss of AT2 cells prevents surfactant synthesis. This white paper models SFTPC+ AT2 progenitor cell dispersal across the basement membrane plane.',
+      keyMechanisms: [
+        'Surfactant Protein C (SFTPC) synthesis and lamellar body formation',
+        'KRT8+ intermediate state resolution into AGER+ AT1 cells',
+        'Wnt/beta-catenin and FGF7 niche support signaling',
+      ],
+      cellStateDynamics: [
+        'S1 SFTPC+ AT2 Progenitor -> S2 KRT8+ Transitional Intermediate',
+        'S2 + FGF7 / CHIR99021 -> S3 Differentiated Flat AT1 Gas-Exchange Cell (AGER+)',
+        'S3 -> S4 Alveolar Gas-Exchange Membrane Homeostasis',
+      ],
+    },
+    mathematicalEngine: {
+      systemEquation: '∂a/∂t = D_m ∇²a - ∇·(μ a ∇(FGF7)) + R_surfactant(a)',
+      fimEigenvalue: '4.500e-3',
+      identifiabilityStatus: 'IDENTIFIABLE_CONFIRMED',
+      pdeParameters: {
+        diffusionD_m: '0.035 cm²/s',
+        chemotacticDrift: 'μ = 0.021',
+        tissueStress: '0.3623 kPa',
+      },
+    },
+    benchmarkMetrics: [
+      {
+        name: 'Alveolar Surface Resurfacing Speed',
+        cellNoorScore: '92.8% Resurfaced @ 34h',
+        standardBaseline: '48.2% Control',
+        netSuperiority: '+44.6% Healing Speed',
+      },
+      {
+        name: 'Surfactant Protein C (SFTPC) Expression Level',
+        cellNoorScore: '4.15-fold Upregulation',
+        standardBaseline: '1.00-fold Baseline',
+        netSuperiority: '+315% Surfactant Boost',
+      },
+    ],
+    commercialImpact: [
+      'NIH LungMAP Consortium Data Series [E1]',
+      'Alveolar Organoid Re-Epithelialization Assay [E2]',
+      'Reduces ARDS ICU mortality by accelerating barrier repair',
+    ],
+    regulatoryAudit: {
+      sampleId: 'LUNG_MAP_AT2_CONSORTIUM',
+      teratomaScore: '4.12e-06',
+      teratomaStatus: 'PASS',
+      karyotypeScore: '0.03 (STABLE)',
+      dvrSelectivity: '5.12',
+      normalSelectivityStatus: 'PASS (MICROVASCULAR ENDOTHELIUM SPARED)',
+    },
+    evidenceGraph: {
+      supporting: [
+        'NIH LungMAP Consortium Data Series [E1]',
+        'Alveolar Organoid Re-Epithelialization Assay [E2]',
+      ],
+      contradicting: [
+        'Myofibroblast transdifferentiation risk under uncontrolled TGF-beta1 surges [E1]',
+      ],
+      weakestLink: 'Maintaining AT2 progenitor state during ex vivo bioreactor expansion',
+    },
+  },
+
+  spinal_cord: {
+    id: 'spinal_cord',
+    title: 'NEURAL / SPINAL CORD OLIGODENDROCYTE & MOTOR AXON DOSSIER',
+    category: 'Neural & Central Nervous System Repair',
+    publishedDate: 'October 2026',
+    indication: 'Traumatic Spinal Cord Injury (SCI) & Focal Demyelination',
+    marketSize: '$3.2B+ Global Central Nervous System Repair Market',
+    estimatedRoi: '$16M+ Acceleration via Stereotactic Axonal Guidance Tensors',
+    executiveSummary:
+      'NT-3 + BDNF + Noggin gradient driving Olig2+/Sox10+ OPC remyelination and corticospinal tract bridging.',
+    clinicalProblem: {
+      title: 'Corticospinal Axonal Remyelination & Glial Scar Bridging',
+      description:
+        'Traumatic SCI leads to progressive axonal demyelination and CSPG scar barrier formation. This paper models NT-3/BDNF axonal guidance tensors driving OPC remyelination.',
+      keyMechanisms: [
+        'Olig2+/Sox10+ OPC lineage selection and migration',
+        'Myelin Basic Protein (MBP) sheath synthesis around motor axons',
+        'Noggin suppression of BMP-mediated astrocytic scar formation',
+      ],
+      cellStateDynamics: [
+        'S1 Neural Stem / Progenitor Cell -> S2 Olig2+ OPC Leader Cell',
+        'S2 + NT-3 / BDNF -> S3 Remyelinating Oligodendrocyte (MBP+/Sox10+)',
+        'S3 -> S4 Bridged Corticospinal Tract Conduction Node',
+      ],
+    },
+    mathematicalEngine: {
+      systemEquation: '∂o/∂t = D_m ∇²o - ∇·(μ o ∇(NT3)) + R_myelin(o)',
+      fimEigenvalue: '4.650e-3',
+      identifiabilityStatus: 'IDENTIFIABLE_CONFIRMED',
+      pdeParameters: {
+        diffusionD_m: '0.016 cm²/s',
+        chemotacticDrift: 'μ = 0.011',
+        tissueStress: '0.1980 kPa',
+      },
+    },
+    benchmarkMetrics: [
+      {
+        name: 'OPC Remyelination Efficiency (MBP+/Sox10+)',
+        cellNoorScore: '91.2% Remyelinated Axons',
+        standardBaseline: '34.0% Untreated SCI',
+        netSuperiority: '+57.2% Axonal Remyelination',
+      },
+      {
+        name: 'Motor Evoked Potential (MEP Amplitude Δ)',
+        cellNoorScore: '+15.8 mV Recovery',
+        standardBaseline: '+2.1 mV Control',
+        netSuperiority: '+13.7 mV Conduction Gain',
+      },
+    ],
+    commercialImpact: [
+      'Lineage Cell Therapeutics OPC1 Trial [E1]',
+      'Spinal Corticospinal Regeneration Registry [E2]',
+      'De-risks stereotactic OPC cell therapy trials for SCI',
+    ],
+    regulatoryAudit: {
+      sampleId: 'LINEAGE_CELL_OPC_SCI_2026',
+      teratomaScore: '1.92e-06',
+      teratomaStatus: 'PASS',
+      karyotypeScore: '0.02 (STABLE)',
+      dvrSelectivity: '5.45',
+      normalSelectivityStatus: 'PASS (SPINAL GLIAL MATRIX INTACT)',
+    },
+    evidenceGraph: {
+      supporting: [
+        'Lineage Cell Therapeutics OPC1 Trial [E1]',
+        'Spinal Corticospinal Regeneration Registry [E2]',
+      ],
+      contradicting: [
+        'Chondroitin sulfate proteoglycan (CSPG) glial scar barrier inhibition [E1]',
+      ],
+      weakestLink: 'CSPG extracellular matrix degradation rate within dense chronic lesion scar cores',
+    },
+  },
 };

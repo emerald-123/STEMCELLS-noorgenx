@@ -37,9 +37,57 @@ import {
   UMAPEmbeddingFigure,
 } from './dossier/DossierCharts';
 
-export default function WhitePaperView() {
+interface WhitePaperViewProps {
+  activeLineage?: string;
+  onSelectLineage?: (id: string) => void;
+}
+
+export default function WhitePaperView({ activeLineage, onSelectLineage }: WhitePaperViewProps = {}) {
   const [selectedId, setSelectedId] = useState<string>('bone_marrow_aml');
   const [isExporting, setIsExporting] = useState<boolean>(false);
+
+  // Sync with prop activeLineage if provided
+  useEffect(() => {
+    if (activeLineage) {
+      const mapped =
+        activeLineage === 'hematology'
+          ? 'bone_marrow_aml'
+          : activeLineage === 'ophthalmic'
+          ? 'corneal_limbal'
+          : activeLineage === 'integumentary'
+          ? 'skin_epidermis'
+          : activeLineage === 'cardiovascular'
+          ? 'cardiac_patch'
+          : activeLineage === 'endocrine'
+          ? 'pancreatic_islet'
+          : activeLineage === 'neuro'
+          ? 'putamen_dopaminergic'
+          : activeLineage === 'auditory'
+          ? 'cochlear_hair_cell'
+          : activeLineage === 'musculoskeletal'
+          ? 'musculoskeletal'
+          : activeLineage === 'pulmonary'
+          ? 'pulmonary'
+          : activeLineage === 'spinal_cord'
+          ? 'spinal_cord'
+          : activeLineage;
+      setSelectedId(mapped);
+    }
+  }, [activeLineage]);
+
+  const handleSelectPaper = (id: string) => {
+    setSelectedId(id);
+    if (onSelectLineage) {
+      onSelectLineage(id);
+    }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('cellnoor:lineage_change', {
+          detail: { lineageId: id },
+        })
+      );
+    }
+  };
 
   // Lead Modal & Checkout Modal state
   const [isLeadModalOpen, setIsLeadModalOpen] = useState<boolean>(false);
@@ -55,23 +103,34 @@ export default function WhitePaperView() {
   const getLineageIcon = (id: string) => {
     switch (id) {
       case 'bone_marrow_aml':
+      case 'hematology':
         return <Dna className="w-4 h-4 text-noorEmerald" />;
       case 'corneal_limbal':
+      case 'ophthalmic':
         return <Eye className="w-4 h-4 text-cyanCore" />;
       case 'skin_epidermis':
+      case 'integumentary':
         return <Sparkles className="w-4 h-4 text-amber-400" />;
       case 'cardiac_patch':
+      case 'cardiovascular':
         return <Heart className="w-4 h-4 text-red-400" />;
       case 'pancreatic_islet':
+      case 'endocrine':
         return <ActivitySquare className="w-4 h-4 text-purple-400" />;
       case 'putamen_dopaminergic':
+      case 'neuro':
         return <Brain className="w-4 h-4 text-blue-400" />;
       case 'cochlear_hair_cell':
+      case 'auditory':
         return <Activity className="w-4 h-4 text-teal-400" />;
       case 'articular_cartilage':
+      case 'musculoskeletal':
         return <Layers className="w-4 h-4 text-emerald-400" />;
       case 'alveolar_at2':
+      case 'pulmonary':
         return <Compass className="w-4 h-4 text-sky-400" />;
+      case 'spinal_cord':
+        return <Sparkles className="w-4 h-4 text-violet-400" />;
       default:
         return <FileText className="w-4 h-4 text-noorEmerald" />;
     }
@@ -314,6 +373,16 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
     'cochlear_hair_cell',
     'articular_cartilage',
     'alveolar_at2',
+    'musculoskeletal',
+    'pulmonary',
+    'spinal_cord',
+    'hematology',
+    'ophthalmic',
+    'integumentary',
+    'cardiovascular',
+    'endocrine',
+    'neuro',
+    'auditory',
   ];
 
   const handleAdminQuickUnlock = () => {
@@ -568,7 +637,7 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
             return (
               <button
                 key={item.id}
-                onClick={() => setSelectedId(item.id)}
+                onClick={() => handleSelectPaper(item.id)}
                 className={`px-3 py-2 rounded-lg text-xs font-mono font-bold flex items-center gap-2 border transition-all whitespace-nowrap ${
                   isSelected
                     ? 'bg-slate-800 text-cyanCore border-cyanCore shadow-lg shadow-cyanCore/10'

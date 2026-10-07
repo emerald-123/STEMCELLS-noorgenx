@@ -20,6 +20,7 @@ import UmapProjection from './UmapProjection';
 import MolecularDockViewer from './MolecularDockViewer';
 import NoorLightPanel from './NoorLightPanel';
 import WhitePaperView from './WhitePaperView';
+import WhitePaperStudy from './WhitePaperStudy';
 import SynergyHeatmapViewer from './SynergyHeatmapViewer';
 import PatientVcfUploader from './PatientVcfUploader';
 import MultiscalePDEViewer from './MultiscalePDEViewer';
@@ -237,7 +238,7 @@ export default function CockpitLayout() {
 
           {/* Active Tab View */}
           {activeNav === 'white_paper' || activeTab === 'paper' ? (
-            <WhitePaperView />
+            <WhitePaperStudy />
           ) : activeTab === 'synergy' ? (
             <SynergyHeatmapViewer />
           ) : activeTab === 'vcf' ? (

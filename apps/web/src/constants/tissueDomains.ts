@@ -112,5 +112,16 @@ export const TISSUE_DOMAINS: TissueDomainConfig[] = [
     viscoelasticDrift_mu: 0.021,
     referenceDataset: 'LUNG_MAP_AT2_CONSORTIUM',
     clinicalBenchmark: 'Pulmonary Fibrosis Repair & In Vitro Alveolar Organoid'
+  },
+  {
+    id: 'spinal_cord',
+    name: 'Spinal Cord Oligodendrocyte & Motor Axon Niche',
+    category: 'Neuro',
+    stemCellType: 'Olig2+ Oligodendrocyte Progenitor Cells (OPCs) & Motor Neural Stem Cells',
+    primaryMorphogens: ['NT-3', 'BDNF', 'Noggin'],
+    diffusionD_m: 0.016,
+    viscoelasticDrift_mu: 0.011,
+    referenceDataset: 'LINEAGE_CELL_OPC_SCI_2026',
+    clinicalBenchmark: 'Lineage Cell Therapeutics OPC1 Trial'
   }
 ];
