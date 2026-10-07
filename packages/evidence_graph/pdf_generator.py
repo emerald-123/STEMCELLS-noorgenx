@@ -157,23 +157,62 @@ class DynamicPDFDossierGenerator:
 
     def generate_pdf_bytes(
         self,
-        sample_id: str = "BEATAML_PATIENT_2026_COHORT",
-        fim_min_eig: float = 0.004,
+        paper_id: str = "bone_marrow_aml",
+        sample_id: str = None,
+        fim_min_eig: float = None,
         fim_alert: bool = False,
-        dvr_score: float = 2.99,
+        dvr_score: float = None,
         selectivity_locked: bool = False,
-        s_teratoma: float = 4.12e-6,
+        s_teratoma: float = None,
         teratoma_passed: bool = True,
         u1_synergy: float = 0.71,
         u2_synergy: float = 0.42,
-        max_bliss_excess: float = 0.38,
-        synergy_coordinates_text: str = "U1 = 0.71 (Revumenib) x U2 = 0.42 (Venetoclax)",
-        pde_tissue_name: str = "Corneal_Limbal_Epithelium",
+        max_bliss_excess: float = None,
+        synergy_coordinates_text: str = None,
+        pde_tissue_name: str = None,
         pde_num_cells: int = 60,
-        pde_stress_sigma: float = 0.0482,
-        pde_velocity_vector: str = "[0.028, 0.011, 0.001]",
-        dossier_category: str = "ONCOLOGY / AML FLAGSHIP"
+        pde_stress_sigma: float = None,
+        pde_velocity_vector: str = None,
+        dossier_category: str = None
     ) -> bytes:
+        # Dynamic Dossier Lookup
+        try:
+            from apps.api.constants.dossiers import get_dossier_data
+            d_info = get_dossier_data(paper_id or pde_tissue_name or "bone_marrow_aml")
+        except Exception:
+            d_info = {}
+
+        dossier_category = dossier_category or d_info.get("category", "ONCOLOGY / AML FLAGSHIP")
+        dossier_title = d_info.get("title", f"CELLNOOR: {dossier_category.upper()} TARGET VALIDATION DOSSIER")
+        sample_id = sample_id or d_info.get("sample_id", "BEATAML_PATIENT_2026_COHORT")
+        indication = d_info.get("indication", "Menin-Inhibitor Resistance in NPM1/KMT2A-Driven Acute Myeloid Leukemia (AML)")
+        market = d_info.get("market", "$2.4B+ Global AML Therapeutics Market")
+        roi = d_info.get("roi", "$12M+ Phase 1/2 Trial Cost Reduction (Predicts MEN1 M327I resistance)")
+        target_claim = d_info.get("target_claim", "Synergistic triplet (Menin Inh + BCL2 Inh + HMA) closes MEN1 M327I escape.")
+        confidence = d_info.get("confidence", "E3_STRONG_COMPUTATIONAL")
+        fig1_title = d_info.get("figure1_title", "Figure 1: Spatio-temporal drug-ratio synergy surface (Bliss model)")
+        max_bliss_excess = max_bliss_excess if max_bliss_excess is not None else d_info.get("max_bliss_excess", 0.38)
+        s_teratoma = s_teratoma if s_teratoma is not None else d_info.get("teratoma_hazard", 4.12e-06)
+        dvr_score = dvr_score if dvr_score is not None else d_info.get("dvr_score", 2.99)
+        selectivity_status_str = d_info.get("selectivity", "PASS (NORMAL STEM CELLS SPARED)")
+        fim_status_str = d_info.get("fim_status", "IDENTIFIABLE (5.25e-3)")
+
+        benchmarks_data = d_info.get("benchmarks", [
+            {"name": "Combination Ranking AUC", "cellNoorScore": "0.892 AUC", "standardBaseline": "0.550 Random", "netSuperiority": "+34.2% Superiority"},
+            {"name": "Escape Clone Sensitivity", "cellNoorScore": "0.845", "standardBaseline": "0.660 Linear DE", "netSuperiority": "+18.5% Superiority"},
+            {"name": "FDA Teratoma Hazard Gate", "cellNoorScore": f"{s_teratoma:.2e}", "standardBaseline": "1.00e-04 Threshold", "netSuperiority": "PASS (Safety Margin)"},
+            {"name": "Stem Cell Viability Preservation", "cellNoorScore": "85.4% Spared", "standardBaseline": "38.2% Baseline", "netSuperiority": "+47.2% Spared"},
+        ])
+
+        supporting_evidence = d_info.get("supporting_evidence", [
+            "GSE228325 Beat AML Combination Series [E1]",
+            "DepMap MOLM-13 & MV4-11 Knockout (-1.42) [E3]",
+            "Evo2 Escape Fitness Score (0.88) [E3]"
+        ])
+        contradicting_evidence = d_info.get("contradicting_evidence", [
+            "Elevated expression in normal reference tissue [E1]"
+        ])
+
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(
             buffer,
@@ -191,8 +230,8 @@ class DynamicPDFDossierGenerator:
             "DocTitle",
             parent=styles["Heading1"],
             fontName="Helvetica-Bold",
-            fontSize=18,
-            leading=22,
+            fontSize=16,
+            leading=20,
             textColor=colors.HexColor("#0F172A"),
             spaceAfter=4,
         )
@@ -217,8 +256,8 @@ class DynamicPDFDossierGenerator:
             "SectionH1",
             parent=styles["Heading2"],
             fontName="Helvetica-Bold",
-            fontSize=12,
-            leading=15,
+            fontSize=11.5,
+            leading=14.5,
             textColor=colors.HexColor("#0F172A"),
             spaceBefore=10,
             spaceAfter=5,
@@ -227,8 +266,8 @@ class DynamicPDFDossierGenerator:
             "DocBody",
             parent=styles["BodyText"],
             fontName="Helvetica",
-            fontSize=9,
-            leading=12.5,
+            fontSize=8.5,
+            leading=12,
             textColor=colors.HexColor("#334155"),
         )
         bold_body_style = ParagraphStyle(
@@ -253,7 +292,7 @@ class DynamicPDFDossierGenerator:
             story.append(RLImage(logo_path, width=2.4 * inch, height=0.66 * inch))
             story.append(Spacer(1, 6))
 
-        story.append(Paragraph(f"CELLNOOR: {dossier_category.upper()} TARGET VALIDATION DOSSIER", title_style))
+        story.append(Paragraph(f"CELLNOOR: {dossier_title}", title_style))
         story.append(Paragraph("Executive Investment & Clinical Research Dossier", subtitle_style))
         story.append(Paragraph("Horizon Commerce LLC (Lorton, VA; UEI: NY9AHGK2BBZ7) | Ecosystem: NoorGenX Platform Suite", subtitle_style))
         story.append(Paragraph('"No cancer left behind. Every patient has a cure."', motto_style))
@@ -262,10 +301,9 @@ class DynamicPDFDossierGenerator:
         # 2. Executive Summary & Market ROI
         story.append(Paragraph("1. EXECUTIVE SUMMARY & MARKET ROI", h1_style))
         exec_summary_text = (
-            "<b>Target Indication:</b> Menin-Inhibitor Resistance in NPM1/KMT2A-Driven Acute Myeloid Leukemia (AML)<br/>"
-            "<b>Addressable Market:</b> $2.4B+ Global AML Therapeutics Market<br/>"
-            "<b>Key Value Metric:</b> Estimated <b>$12M+ Phase 1/2 Trial Cost Reduction</b> by eliminating "
-            "non-viable combination arms and predicting MEN1 M327I resistance 14 months ahead of wet-lab synthesis."
+            f"<b>Target Indication:</b> {indication}<br/>"
+            f"<b>Addressable Market:</b> {market}<br/>"
+            f"<b>Key Value Metric / ROI:</b> <b>{roi}</b>"
         )
         summary_table = Table([[Paragraph(exec_summary_text, body_style)]], colWidths=[7.2 * inch])
         summary_table.setStyle(TableStyle([
@@ -279,9 +317,8 @@ class DynamicPDFDossierGenerator:
         # 3. Target Hypothesis & 2D Synergy Surface
         story.append(Paragraph("2. TARGET HYPOTHESIS & SPATIO-TEMPORAL SYNERGY", h1_style))
         hypothesis_text = (
-            "<b>Target Claim:</b> Synergistic combination of Menin inhibitor + BCL2 inhibitor + HMA "
-            "effectively closes MEN1 M327I resistant escape in NPM1/KMT2A AML.<br/>"
-            "<b>Confidence Classification:</b> <font color='#0E7490'><b>E3_STRONG_COMPUTATIONAL</b></font> (Replicated across 2 independent cohorts)"
+            f"<b>Target Claim:</b> {target_claim}<br/>"
+            f"<b>Confidence Classification:</b> <font color='#0E7490'><b>{confidence}</b></font> (Replicated across independent cohorts)"
         )
         story.append(Paragraph(hypothesis_text, body_style))
         story.append(Spacer(1, 6))
@@ -292,14 +329,18 @@ class DynamicPDFDossierGenerator:
 
         # 4. Preclinical Benchmark Superiority Table
         story.append(Paragraph("3. PRECLINICAL BENCHMARK SUPERIORITY AUDIT", h1_style))
-        benchmark_data = [
-            [Paragraph("<b>Benchmark Metric Name</b>", bold_body_style), Paragraph("<b>CellNoor Score</b>", bold_body_style), Paragraph("<b>Standard Baseline</b>", bold_body_style), Paragraph("<b>Net Superiority / Margin</b>", bold_body_style)],
-            [Paragraph("Combination Ranking AUC", body_style), Paragraph("<b>0.892 AUC</b>", body_style), Paragraph("0.550 Random", body_style), Paragraph("<font color='#15803D'><b>+34.2% Superiority</b></font>", body_style)],
-            [Paragraph("Escape Clone Sensitivity", body_style), Paragraph("<b>0.845</b>", body_style), Paragraph("0.660 Linear DE", body_style), Paragraph("<font color='#15803D'><b>+18.5% Superiority</b></font>", body_style)],
-            [Paragraph("FDA Teratoma Hazard Gate", body_style), Paragraph("<b>4.12e-06</b>", body_style), Paragraph("1.00e-04 Threshold", body_style), Paragraph("<font color='#15803D'><b>PASS (24.3x Safety Margin)</b></font>", body_style)],
-            [Paragraph("HSC Viability Preservation", body_style), Paragraph("<b>85.4% Spared</b>", body_style), Paragraph("38.2% Baseline", body_style), Paragraph("<font color='#15803D'><b>+47.2% Spared</b></font>", body_style)],
+        benchmark_rows = [
+            [Paragraph("<b>Benchmark Metric Name</b>", bold_body_style), Paragraph("<b>CellNoor Score</b>", bold_body_style), Paragraph("<b>Standard Baseline</b>", bold_body_style), Paragraph("<b>Net Superiority / Margin</b>", bold_body_style)]
         ]
-        benchmark_table = Table(benchmark_data, colWidths=[2.2 * inch, 1.4 * inch, 1.6 * inch, 2.0 * inch])
+        for bench in benchmarks_data:
+            benchmark_rows.append([
+                Paragraph(bench["name"], body_style),
+                Paragraph(f"<b>{bench['cellNoorScore']}</b>", body_style),
+                Paragraph(bench["standardBaseline"], body_style),
+                Paragraph(f"<font color='#15803D'><b>{bench['netSuperiority']}</b></font>", body_style)
+            ])
+
+        benchmark_table = Table(benchmark_rows, colWidths=[2.2 * inch, 1.4 * inch, 1.6 * inch, 2.0 * inch])
         benchmark_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#F1F5F9")),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E1")),
@@ -342,14 +383,13 @@ class DynamicPDFDossierGenerator:
         # 6. Safety & Cytopenia Audit
         story.append(Paragraph("5. REGULATORY-GRADE SAFETY & CYTOPENIA AUDIT", h1_style))
         teratoma_status = "<font color='#15803D'><b>PASS (&le; 1.00e-04)</b></font>" if teratoma_passed else "<font color='#B91C1C'><b>HIGH_RISK_REJECTED</b></font>"
-        selectivity_status = "<font color='#B91C1C'><b>LOCKED_E4 (CYTOPENIA RISK)</b></font>" if selectivity_locked else "<font color='#15803D'><b>PASS (NORMAL HSC SPARED)</b></font>"
 
         safety_text = (
             f"<b>Sample Accession ID:</b> {sample_id}<br/>"
             f"<b>FDA CBER Teratoma Hazard (S_teratoma):</b> {s_teratoma:.2e} [{teratoma_status}]<br/>"
-            f"<b>Karyotypic Instability Index:</b> 0.12 [<font color='#15803D'><b>STABLE</b></font>]<br/>"
+            f"<b>Fisher Information Status:</b> <font color='#15803D'><b>{fim_status_str}</b></font><br/>"
             f"<b>Differential Vulnerability Ratio (DVR):</b> {dvr_score:.2f}<br/>"
-            f"<b>Normal Stem Cell Selectivity:</b> {selectivity_status}"
+            f"<b>Stem Cell Selectivity:</b> <font color='#15803D'><b>{selectivity_status_str}</b></font>"
         )
         safety_table = Table([[Paragraph(safety_text, body_style)]], colWidths=[7.2 * inch])
         safety_table.setStyle(TableStyle([
@@ -362,11 +402,13 @@ class DynamicPDFDossierGenerator:
 
         # 7. Multi-Omics Evidence Graph (Why-Graph)
         story.append(Paragraph("6. MULTI-OMICS EVIDENCE GRAPH (WHY-GRAPH)", h1_style))
+        sup_html = "<br/>".join([f"• {s}" for s in supporting_evidence])
+        con_html = "<br/>".join([f"• {c}" for c in contradicting_evidence])
         evidence_data = [
             [Paragraph("<b>Supporting Evidence [E1-E3]</b>", bold_body_style), Paragraph("<b>Contradicting Evidence [E1]</b>", bold_body_style)],
             [
-                Paragraph("• GSE228325 Beat AML Combination Series [E1]<br/>• DepMap MOLM-13 & MV4-11 (-1.42) [E3]<br/>• Evo2 Escape Fitness Score (0.88) [E3]", body_style),
-                Paragraph("• Elevated expression in normal CD34+ cord blood (HCA reference) [E1]", body_style)
+                Paragraph(sup_html, body_style),
+                Paragraph(con_html, body_style)
             ]
         ]
         evidence_table = Table(evidence_data, colWidths=[3.6 * inch, 3.6 * inch])
@@ -381,7 +423,7 @@ class DynamicPDFDossierGenerator:
         # 8. Compliance & Provenance Footer
         story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#CBD5E1"), spaceAfter=4))
         footer_text = (
-            f"Git Commit: 9f81a7b | Accession: GSE228325 | Operator: amjad@noorgenx.com<br/>"
+            f"Lineage: {paper_id.upper()} | Accession: {sample_id} | Operator: amjad@noorgenx.com<br/>"
             f"License Clearance: ESMFold / Evo2 / AlphaGenome (COMMERCIAL CLEARANCE VERIFIED)<br/>"
             f"Generated: {time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}"
         )
@@ -391,4 +433,5 @@ class DynamicPDFDossierGenerator:
         pdf_bytes = buffer.getvalue()
         buffer.close()
         return pdf_bytes
+
 

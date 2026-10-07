@@ -81,17 +81,8 @@ export default function WhitePaperView() {
   const streamPdf = async () => {
     setIsExporting(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/dossier/pdf`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sample_id: paper.regulatoryAudit.sampleId,
-          pde_tissue_name: paper.id,
-          pde_num_cells: 64,
-          pde_stress_sigma: parseFloat(paper.mathematicalEngine.pdeParameters.tissueStress) || 0.0482,
-          pde_velocity_vector: paper.mathematicalEngine.pdeParameters.chemotacticDrift,
-          dossier_category: paper.category.toUpperCase(),
-        }),
+      const response = await fetch(`${API_BASE_URL}/api/v1/dossier/export?paper_id=${paper.id}&format=pdf`, {
+        method: 'GET',
       });
 
       if (!response.ok) {
@@ -102,7 +93,7 @@ export default function WhitePaperView() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `CellNoor_WhitePaper_${paper.id}.pdf`;
+      a.download = `CellNoor_Executive_Dossier_${paper.id.toUpperCase()}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -226,7 +217,7 @@ export default function WhitePaperView() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `CellNoor_WhitePaper_${paper.id}.docx`;
+    a.download = `CellNoor_Executive_Dossier_${paper.id.toUpperCase()}.docx`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -300,7 +291,7 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `CellNoor_WhitePaper_${paper.id}.txt`;
+    a.download = `CellNoor_Executive_Dossier_${paper.id.toUpperCase()}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

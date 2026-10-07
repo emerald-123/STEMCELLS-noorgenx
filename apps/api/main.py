@@ -29,6 +29,7 @@ from packages.model_registry import ModelRegistryGateway
 from packages.core_sdk import CoreSDKClient
 from workflows.aml_menin import AMLMeninWorkflowPipeline
 from apps.api.routers.billing import router as billing_router
+from apps.api.routers.export import router as export_router
 
 app = FastAPI(
     title="CellNoor API",
@@ -37,6 +38,7 @@ app = FastAPI(
 )
 
 app.include_router(billing_router)
+app.include_router(export_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -150,26 +152,28 @@ def generate_pdf_dossier(payload: Dict[str, Any] = None):
     if payload is None:
         payload = {}
 
-    sample_id = payload.get("sample_id", "BEATAML_PATIENT_2026_COHORT")
-    fim_min_eig = payload.get("fim_min_eigenvalue", 0.004)
+    paper_id = payload.get("paper_id") or payload.get("pde_tissue_name") or "bone_marrow_aml"
+    sample_id = payload.get("sample_id")
+    fim_min_eig = payload.get("fim_min_eigenvalue")
     fim_alert = payload.get("fim_unconstrained_alert", False)
-    dvr_score = payload.get("dvr_score", 2.99)
+    dvr_score = payload.get("dvr_score")
     selectivity_locked = payload.get("dvr_selectivity_locked", False)
-    s_teratoma = payload.get("s_teratoma", 4.12e-6)
+    s_teratoma = payload.get("s_teratoma")
     teratoma_passed = payload.get("teratoma_passed", True)
 
     u1_synergy = payload.get("u1_synergy", 0.71)
     u2_synergy = payload.get("u2_synergy", 0.42)
-    max_bliss_excess = payload.get("max_bliss_excess", 0.38)
-    synergy_text = payload.get("synergy_coordinates_text", f"U1 = {u1_synergy:.2f} (Revumenib) x U2 = {u2_synergy:.2f} (Venetoclax)")
+    max_bliss_excess = payload.get("max_bliss_excess")
+    synergy_text = payload.get("synergy_coordinates_text")
 
-    pde_tissue_name = payload.get("pde_tissue_name", "Corneal_Limbal_Epithelium")
+    pde_tissue_name = payload.get("pde_tissue_name")
     pde_num_cells = payload.get("pde_num_cells", 60)
-    pde_stress_sigma = payload.get("pde_stress_sigma", 0.0482)
-    pde_velocity_vector = payload.get("pde_velocity_vector", "[0.028, 0.011, 0.001]")
-    dossier_category = payload.get("dossier_category", "ONCOLOGY / AML FLAGSHIP")
+    pde_stress_sigma = payload.get("pde_stress_sigma")
+    pde_velocity_vector = payload.get("pde_velocity_vector")
+    dossier_category = payload.get("dossier_category")
 
     pdf_bytes = pdf_generator.generate_pdf_bytes(
+        paper_id=paper_id,
         sample_id=sample_id,
         fim_min_eig=fim_min_eig,
         fim_alert=fim_alert,
@@ -188,11 +192,13 @@ def generate_pdf_dossier(payload: Dict[str, Any] = None):
         dossier_category=dossier_category,
     )
 
+    filename = f"CellNoor_Executive_Dossier_{paper_id.upper()}.pdf"
+
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
         headers={
-            "Content-Disposition": f"attachment; filename=CellNoor_Executive_Dossier_AML_Menin.pdf"
+            "Content-Disposition": f"attachment; filename={filename}"
         }
     )
 
