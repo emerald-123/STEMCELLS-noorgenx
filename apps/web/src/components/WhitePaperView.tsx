@@ -879,76 +879,43 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
                 </tr>
               </thead>
               <tbody className="divide-y divide-convexBorder">
-                <tr className="hover:bg-slate-900/40">
-                  <td className="p-2.5 text-noorEmerald font-bold">Hematopoietic (Bone Marrow LSC)</td>
-                  <td className="p-2.5 text-slate-300">1.42e-06</td>
-                  <td className="p-2.5 text-slate-300">[0.028, 0.011, 0.001]</td>
-                  <td className="p-2.5 text-slate-300">0.0482</td>
-                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (5.25e-3)</td>
-                </tr>
-                <tr className="hover:bg-slate-900/40">
-                  <td className="p-2.5 text-cyanCore font-bold">Corneal (Limbal Epithelium)</td>
-                  <td className="p-2.5 text-slate-300">1.18e-06</td>
-                  <td className="p-2.5 text-slate-300">[0.015, 0.008, 0.000]</td>
-                  <td className="p-2.5 text-slate-300">0.0345</td>
-                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (4.82e-3)</td>
-                </tr>
-                <tr className="hover:bg-slate-900/40">
-                  <td className="p-2.5 text-amber-400 font-bold">Integumentary (Skin Epidermis)</td>
-                  <td className="p-2.5 text-slate-300">2.10e-06</td>
-                  <td className="p-2.5 text-slate-300">[0.032, 0.019, 0.002]</td>
-                  <td className="p-2.5 text-slate-300">0.0812</td>
-                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (4.83e-3)</td>
-                </tr>
-                <tr className="hover:bg-slate-900/40">
-                  <td className="p-2.5 text-red-400 font-bold">Cardiovascular (Cardiac Patch)</td>
-                  <td className="p-2.5 text-slate-300">3.45e-06</td>
-                  <td className="p-2.5 text-slate-300">[0.045, 0.022, 0.005]</td>
-                  <td className="p-2.5 text-slate-300">1.4819</td>
-                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (6.10e-3)</td>
-                </tr>
-                <tr className="hover:bg-slate-900/40">
-                  <td className="p-2.5 text-purple-400 font-bold">Pancreatic (Islet Progenitor)</td>
-                  <td className="p-2.5 text-slate-300">1.85e-06</td>
-                  <td className="p-2.5 text-slate-300">[0.021, 0.012, 0.001]</td>
-                  <td className="p-2.5 text-slate-300">0.1250</td>
-                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (3.95e-3)</td>
-                </tr>
-                <tr className="hover:bg-slate-900/40">
-                  <td className="p-2.5 text-blue-400 font-bold">Neuro (Putamen Dopaminergic)</td>
-                  <td className="p-2.5 text-slate-300">2.60e-06</td>
-                  <td className="p-2.5 text-slate-300">[0.038, 0.015, 0.003]</td>
-                  <td className="p-2.5 text-slate-300">0.2238</td>
-                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (4.12e-3)</td>
-                </tr>
-                <tr className="hover:bg-slate-900/40">
-                  <td className="p-2.5 text-teal-400 font-bold">Auditory (Cochlear Hair Cell)</td>
-                  <td className="p-2.5 text-slate-300">1.25e-06</td>
-                  <td className="p-2.5 text-slate-300">[0.018, 0.009, 0.001]</td>
-                  <td className="p-2.5 text-slate-300">0.1411</td>
-                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (3.80e-3)</td>
-                </tr>
-                <tr className="hover:bg-slate-900/40">
-                  <td className="p-2.5 text-emerald-400 font-bold">Musculoskeletal (Articular Cartilage)</td>
-                  <td className="p-2.5 text-slate-300">3.10e-06</td>
-                  <td className="p-2.5 text-slate-300">[0.040, 0.025, 0.004]</td>
-                  <td className="p-2.5 text-slate-300">1.1221</td>
-                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (5.88e-3)</td>
-                </tr>
-                <tr className={`hover:bg-slate-900/40 ${paper.id === 'pulmonary' || paper.id === 'alveolar_at2' ? 'bg-noorEmerald/10 border-l-2 border-noorEmerald' : ''}`}>
-                  <td className="p-2.5 text-sky-400 font-bold">Pulmonary (Alveolar AT2)</td>
-                  <td className="p-2.5 text-slate-300">2.40e-06</td>
-                  <td className="p-2.5 text-slate-300">[0.030, 0.014, 0.002]</td>
-                  <td className="p-2.5 text-slate-300">0.3623</td>
-                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (4.50e-3)</td>
-                </tr>
-                <tr className={`hover:bg-slate-900/40 ${paper.id === 'spinal_cord' || paper.id === 'neural' ? 'bg-noorEmerald/10 border-l-2 border-noorEmerald' : ''}`}>
-                  <td className="p-2.5 text-indigo-400 font-bold">Neural (Spinal Cord / OPC)</td>
-                  <td className="p-2.5 text-slate-300">1.60e-06</td>
-                  <td className="p-2.5 text-slate-300">[0.026, 0.012, 0.002]</td>
-                  <td className="p-2.5 text-slate-300">0.1980</td>
-                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (4.65e-3)</td>
-                </tr>
+                {[
+                  { id: 'hematology', alias: ['hematology', 'bone_marrow_aml'], name: 'Hematopoietic (Bone Marrow LSC)', diff: '1.42e-06', drift: '[0.028, 0.011, 0.001]', ecm: '0.0482', fim: 'IDENTIFIABLE (5.25e-3)', color: 'text-noorEmerald' },
+                  { id: 'ophthalmic', alias: ['ophthalmic', 'corneal_limbal'], name: 'Corneal (Limbal Epithelium)', diff: '1.18e-06', drift: '[0.015, 0.008, 0.000]', ecm: '0.0345', fim: 'IDENTIFIABLE (4.82e-3)', color: 'text-cyanCore' },
+                  { id: 'integumentary', alias: ['integumentary', 'skin_epidermis'], name: 'Integumentary (Skin Epidermis)', diff: '2.10e-06', drift: '[0.032, 0.019, 0.002]', ecm: '0.0812', fim: 'IDENTIFIABLE (4.83e-3)', color: 'text-amber-400' },
+                  { id: 'cardiovascular', alias: ['cardiovascular', 'cardiac_patch'], name: 'Cardiovascular (Cardiac Patch)', diff: '3.45e-06', drift: '[0.045, 0.022, 0.005]', ecm: '1.4819', fim: 'IDENTIFIABLE (6.10e-3)', color: 'text-red-400' },
+                  { id: 'endocrine', alias: ['endocrine', 'pancreatic_islet'], name: 'Pancreatic (Islet Progenitor)', diff: '1.85e-06', drift: '[0.021, 0.012, 0.001]', ecm: '0.1250', fim: 'IDENTIFIABLE (3.95e-3)', color: 'text-purple-400' },
+                  { id: 'neuro', alias: ['neuro', 'putamen_dopaminergic'], name: 'Neuro (Putamen Dopaminergic)', diff: '2.60e-06', drift: '[0.038, 0.015, 0.003]', ecm: '0.2238', fim: 'IDENTIFIABLE (4.12e-3)', color: 'text-blue-400' },
+                  { id: 'auditory', alias: ['auditory', 'cochlear_hair_cell'], name: 'Auditory (Cochlear Hair Cell)', diff: '1.25e-06', drift: '[0.018, 0.009, 0.001]', ecm: '0.1411', fim: 'IDENTIFIABLE (3.80e-3)', color: 'text-teal-400' },
+                  { id: 'musculoskeletal', alias: ['musculoskeletal', 'articular_cartilage'], name: 'Musculoskeletal (Articular Cartilage)', diff: '3.10e-06', drift: '[0.040, 0.025, 0.004]', ecm: '1.1221', fim: 'IDENTIFIABLE (5.88e-3)', color: 'text-emerald-400' },
+                  { id: 'pulmonary', alias: ['pulmonary', 'alveolar_at2'], name: 'Pulmonary (Alveolar AT2)', diff: '2.40e-06', drift: '[0.030, 0.014, 0.002]', ecm: '0.3623', fim: 'IDENTIFIABLE (4.50e-3)', color: 'text-sky-400' },
+                  { id: 'spinal_cord', alias: ['spinal_cord', 'neural'], name: 'Neural (Spinal Cord / OPC)', diff: '1.60e-06', drift: '[0.026, 0.012, 0.002]', ecm: '0.1980', fim: 'IDENTIFIABLE (4.65e-3)', color: 'text-indigo-400' },
+                ].map((row) => {
+                  const isActive = row.alias.includes(paper.id) || row.alias.includes(activeLineage || '');
+                  return (
+                    <tr
+                      key={row.id}
+                      className={`border-b border-slate-800/60 transition-all ${
+                        isActive
+                          ? 'bg-noorEmerald/20 font-semibold border-l-4 border-l-noorEmerald shadow-sm'
+                          : 'hover:bg-slate-900/40'
+                      }`}
+                    >
+                      <td className={`p-2.5 ${isActive ? 'text-noorEmerald font-extrabold' : `${row.color} font-bold`}`}>
+                        <span>{row.name}</span>
+                        {isActive && (
+                          <span className="ml-2 text-[10px] bg-noorEmerald text-slate-950 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider shadow">
+                            ACTIVE TARGET
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-2.5 text-slate-300 font-mono text-xs">{row.diff}</td>
+                      <td className="p-2.5 text-slate-300 font-mono text-xs">{row.drift}</td>
+                      <td className="p-2.5 text-slate-300 font-mono text-xs">{row.ecm}</td>
+                      <td className="p-2.5 text-noorEmerald font-bold text-xs">{row.fim}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

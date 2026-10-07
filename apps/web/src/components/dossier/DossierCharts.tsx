@@ -263,23 +263,31 @@ export const UMAPEmbeddingFigure: React.FC<ChartProps> = ({ paper }) => {
 
   const s3Label = isOncology ? 'S3' : 'S3 Target';
 
-  let targetCellSub = 'Functional Target';
+  let s3SubLine1 = 'Functional Target';
+  let s3SubLine2 = '(Target Lineage)';
+
   if (paperId.includes('spinal') || paper?.indication?.toLowerCase().includes('spinal')) {
-    targetCellSub = 'Olig2+/MBP+ Oligos';
+    s3SubLine1 = 'Olig2+ OPC';
+    s3SubLine2 = '(Target Lineage)';
   } else if (paperId.includes('limbal') || paper?.indication?.toLowerCase().includes('corneal')) {
-    targetCellSub = 'LESC Epithelium';
+    s3SubLine1 = 'LESC Epithelium';
+    s3SubLine2 = '(Target Lineage)';
   } else if (paperId.includes('dopaminergic') || paper?.indication?.toLowerCase().includes('parkinson')) {
-    targetCellSub = 'A9 DA Neurons';
+    s3SubLine1 = 'A9 DA Neurons';
+    s3SubLine2 = '(Target Lineage)';
   } else if (paperId.includes('cartilage') || paper?.indication?.toLowerCase().includes('cartilage')) {
-    targetCellSub = 'COL2A1+ Chondrocytes';
+    s3SubLine1 = 'COL2A1+ Chondrocytes';
+    s3SubLine2 = '(Target Lineage)';
   } else if (paperId.includes('at2') || paper?.indication?.toLowerCase().includes('pulmonary')) {
-    targetCellSub = 'SFTPC+ AT2 Epithelium';
+    s3SubLine1 = 'SFTPC+ AT2 Epithelium';
+    s3SubLine2 = '(Target Lineage)';
+  } else if (isOncology) {
+    s3SubLine1 = 'Blasts (3,890)';
+    s3SubLine2 = '';
   }
 
-  const s3Sub = isOncology ? 'Blasts (3,890)' : targetCellSub;
-
-  const s4Label = isOncology ? 'S4' : 'S4 Host';
-  const s4Sub = isOncology ? 'Myeloid (1,100)' : 'Quiescent Matrix';
+  const s4Label = 'S4';
+  const s4Sub = isOncology ? 'Myeloid (1,100)' : 'Quiescent Host Matrix';
 
   const s5Label = isOncology ? 'S5' : 'S5 Spec';
   const s5Sub = isOncology ? 'MEN1 M327I (850)' : 'Terminal Specification';
@@ -303,8 +311,8 @@ export const UMAPEmbeddingFigure: React.FC<ChartProps> = ({ paper }) => {
         <svg viewBox="0 0 450 160" className="w-full h-full">
           {/* Trajectory Vectors */}
           <path d="M 120 70 L 220 50" stroke="#64748B" strokeWidth="1.5" strokeDasharray="3 3" />
-          <path d="M 220 50 L 320 35" stroke="#10B981" strokeWidth="2" />
-          <path d="M 220 50 L 330 115" stroke="#3B82F6" strokeWidth="2" strokeDasharray="4 4" />
+          <path d="M 220 50 L 280 120" stroke="#10B981" strokeWidth="2" />
+          <path d="M 220 50 L 340 35" stroke="#3B82F6" strokeWidth="2" strokeDasharray="4 4" />
 
           {/* S1 Node */}
           <circle cx="120" cy="70" r="18" fill="#334155" stroke="#64748B" strokeWidth="2" />
@@ -316,12 +324,15 @@ export const UMAPEmbeddingFigure: React.FC<ChartProps> = ({ paper }) => {
           <text x="220" y="53" fill="#F8FAFC" fontSize="9" textAnchor="middle" fontFamily="monospace" fontWeight="bold">{s2Label}</text>
           <text x="220" y="85" fill={isOncology ? '#EF4444' : '#06B6D4'} fontSize="8" textAnchor="middle" fontFamily="monospace">{s2Sub}</text>
 
-          {/* S3 Node */}
+          {/* S3 Node - Stacked 2-line label to prevent cut off */}
           <circle cx="280" cy="120" r="16" fill={isOncology ? '#78350F' : '#065F46'} stroke={isOncology ? '#F59E0B' : '#10B981'} strokeWidth="2" />
           <text x="280" y="123" fill="#F8FAFC" fontSize="9" textAnchor="middle" fontFamily="monospace" fontWeight="bold">{s3Label}</text>
-          <text x="280" y="145" fill={isOncology ? '#F59E0B' : '#10B981'} fontSize="8" textAnchor="middle" fontFamily="monospace">{s3Sub}</text>
+          <text x="280" y="143" fill={isOncology ? '#F59E0B' : '#10B981'} fontSize="8" textAnchor="middle" fontFamily="monospace" fontWeight="bold">{s3SubLine1}</text>
+          {s3SubLine2 && (
+            <text x="280" y="153" fill={isOncology ? '#F59E0B' : '#10B981'} fontSize="7" textAnchor="middle" fontFamily="monospace">{s3SubLine2}</text>
+          )}
 
-          {/* S4 Node */}
+          {/* S4 Node - Node text inside S4, text outside Quiescent Host Matrix */}
           <circle cx="340" cy="35" r="22" fill={isOncology ? '#065F46' : '#334155'} stroke={isOncology ? '#10B981' : '#64748B'} strokeWidth="2.5" />
           <text x="340" y="38" fill="#F8FAFC" fontSize="9" textAnchor="middle" fontFamily="monospace" fontWeight="bold">{s4Label}</text>
           <text x="340" y="68" fill={isOncology ? '#10B981' : '#94A3B8'} fontSize="8" textAnchor="middle" fontFamily="monospace">{s4Sub}</text>

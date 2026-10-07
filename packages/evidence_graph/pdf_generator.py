@@ -157,7 +157,8 @@ class DynamicPDFDossierGenerator:
         self,
         is_oncology: bool = True,
         sample_id_text: str = None,
-        lineage_cells_text: str = None
+        lineage_cells_text: str = None,
+        paper_id: str = None
     ) -> Drawing:
         """Draw Single-Cell UMAP Clonal Divergence or Lineage Trajectory Diagram in ReportLab Vector Graphics."""
         d = Drawing(518, 120)
@@ -203,16 +204,21 @@ class DynamicPDFDossierGenerator:
             d.add(String(202, 42, "S2 Transit", fontName="Helvetica-Bold", fontSize=7, fillColor=colors.white))
             d.add(String(185, 20, "Intermediate Transit", fontName="Helvetica-Bold", fontSize=7, fillColor=colors.HexColor("#06B6D4")))
 
-            # Functional Differentiated Cell
+            # Functional Differentiated Cell (S3 Target)
             d.add(Circle(310, 30, 16, fillColor=colors.HexColor("#065F46"), strokeColor=colors.HexColor("#10B981"), strokeWidth=2))
             d.add(String(304, 27, "S3 Target", fontName="Helvetica-Bold", fontSize=7, fillColor=colors.white))
-            target_text = (lineage_cells_text or "Functional Target Cell")[:25]
-            d.add(String(280, 8, target_text, fontName="Helvetica", fontSize=7, fillColor=colors.HexColor("#10B981")))
+            if "spinal" in (paper_id or "").lower() or "opc" in (lineage_cells_text or "").lower():
+                d.add(String(265, 12, "Olig2+ OPC Target", fontName="Helvetica-Bold", fontSize=7, fillColor=colors.HexColor("#10B981")))
+                d.add(String(262, 2, "(Target Lineage)", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor("#10B981")))
+            else:
+                target_text = (lineage_cells_text or "Functional Target")[:22]
+                d.add(String(265, 12, target_text, fontName="Helvetica-Bold", fontSize=7, fillColor=colors.HexColor("#10B981")))
+                d.add(String(262, 2, "(Target Lineage)", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor("#10B981")))
 
-            # Host Matrix
+            # Host Matrix (S4) - S4 inside circle, Quiescent Host Matrix outside (no collision)
             d.add(Circle(330, 85, 15, fillColor=colors.HexColor("#475569"), strokeColor=colors.HexColor("#64748B"), strokeWidth=2))
-            d.add(String(324, 82, "S4 Host", fontName="Helvetica-Bold", fontSize=7, fillColor=colors.white))
-            d.add(String(350, 82, "Quiescent Matrix", fontName="Helvetica", fontSize=7, fillColor=colors.HexColor("#94A3B8")))
+            d.add(String(324, 82, "S4", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.white))
+            d.add(String(350, 82, "Quiescent Host Matrix", fontName="Helvetica", fontSize=7, fillColor=colors.HexColor("#94A3B8")))
 
         return d
 
@@ -434,7 +440,8 @@ class DynamicPDFDossierGenerator:
         story.append(self._create_umap_divergence_drawing(
             is_oncology=is_oncology,
             sample_id_text=sample_id_text,
-            lineage_cells_text=lineage_cells_text
+            lineage_cells_text=lineage_cells_text,
+            paper_id=paper_id
         ))
         story.append(Spacer(1, 6))
 
@@ -473,7 +480,13 @@ class DynamicPDFDossierGenerator:
         }
         active_idx = lineage_row_map.get((paper_id or "").lower().strip())
         if active_idx and active_idx < len(tissue_table_data):
-            table_style_cmd.append(('BACKGROUND', (0, active_idx), (-1, active_idx), colors.HexColor("#ECFDF5")))
+            table_style_cmd.append(('BACKGROUND', (0, active_idx), (-1, active_idx), colors.HexColor("#D1FAE5")))
+            # Update target lineage name with bold emerald styling & ACTIVE TARGET badge
+            orig_p = tissue_table_data[active_idx][0]
+            if isinstance(orig_p, Paragraph):
+                raw_text = orig_p.text
+                highlighted_html = f"<b>{raw_text}</b> &nbsp;<font color='#059669'><b>[ACTIVE TARGET]</b></font>"
+                tissue_table_data[active_idx][0] = Paragraph(highlighted_html, bold_body_style)
 
         tissue_table = Table(tissue_table_data, colWidths=[2.2 * inch, 1.2 * inch, 1.4 * inch, 1.0 * inch, 1.4 * inch])
         tissue_table.setStyle(TableStyle(table_style_cmd))
