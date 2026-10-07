@@ -10,9 +10,11 @@ from reportlab.platypus import (
     TableStyle,
     HRFlowable,
     KeepTogether,
+    Image as RLImage,
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
+import os
 
 class DynamicPDFDossierGenerator:
     """
@@ -111,7 +113,12 @@ class DynamicPDFDossierGenerator:
 
         story = []
 
-        # 1. Header Banner
+        # 1. Top Left Brand Logo & Header Banner
+        logo_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "apps", "web", "public", "brand", "noorgenx-official-logo.png")
+        if os.path.exists(logo_path):
+            story.append(RLImage(logo_path, width=1.6 * inch, height=0.45 * inch))
+            story.append(Spacer(1, 6))
+
         story.append(Paragraph("CELLNOOR (v1.0 AML FLAGSHIP)", title_style))
         story.append(Paragraph("Executive Investment & Clinical Research Dossier", subtitle_style))
         story.append(Paragraph("Horizon Commerce LLC (Lorton, VA; UEI: NY9AHGK2BBZ7) | Ecosystem: NoorGenX Platform Suite", subtitle_style))

@@ -172,6 +172,9 @@ export default function WhitePaperView() {
         </style>
       </head>
       <body>
+        <div style="margin-bottom: 15px;">
+          <img src="https://stemcells.noorgenx.com/brand/noorgenx-official-logo.png" alt="NoorGenX™ Logo" style="height: 48px; width: auto;" />
+        </div>
         <h1>${paper.title}</h1>
         <div className="meta">
           <strong>Category:</strong> ${paper.category} | <strong>Published:</strong> ${paper.publishedDate}<br/>
@@ -270,12 +273,8 @@ export default function WhitePaperView() {
   const streamTxt = () => {
     const txtContent = `
 ================================================================================
-CELLNOOR TECHNICAL WHITE PAPER & CLINICAL DOSSIER
-Title: ${paper.title}
-Category: ${paper.category} | Published: ${paper.publishedDate}
-Operating Entity: Horizon Commerce LLC (Lorton, VA; UEI: NY9AHGK2BBZ7)
-Ecosystem: NoorGenX Platform Suite (amjad@noorgenx.com)
-Motto: "No cancer left behind. Every patient has a cure."
+[ NOORGENX™ PLATFORM SUITE - OFFICIAL AUDITED CLINICAL DOSSIER ]
+Horizon Commerce LLC (Lorton, VA; UEI: NY9AHGK2BBZ7) | amjad@noorgenx.com
 ================================================================================
 
 1. EXECUTIVE SUMMARY & ROI
@@ -513,19 +512,27 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
       {/* Main Header & Export Bar */}
       <div className="border-t border-b border-convexBorder py-4 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-cyanCore/20 text-cyanCore border border-cyanCore/40 uppercase">
-                {paper.category}
-              </span>
-              <span className="text-xs font-mono text-slate-400">
-                Published: {paper.publishedDate}
-              </span>
-              {unlockedPapers.includes(paper.id) && (
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-noorEmerald/20 text-noorEmerald border border-noorEmerald/40 uppercase">
-                  UNLOCKED
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <img
+                src="/brand/noorgenx-official-logo.png"
+                alt="NoorGenX™ Logo"
+                className="h-9 w-auto object-contain shrink-0"
+              />
+              <div className="h-6 w-px bg-slate-800" />
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-cyanCore/20 text-cyanCore border border-cyanCore/40 uppercase">
+                  {paper.category}
                 </span>
-              )}
+                <span className="text-xs font-mono text-slate-400">
+                  Published: {paper.publishedDate}
+                </span>
+                {unlockedPapers.includes(paper.id) && (
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-noorEmerald/20 text-noorEmerald border border-noorEmerald/40 uppercase">
+                    UNLOCKED
+                  </span>
+                )}
+              </div>
             </div>
             <h1 className="text-xl md:text-2xl font-black text-slate-100 tracking-wide">
               {paper.title}
