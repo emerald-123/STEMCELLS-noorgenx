@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { CreditCard, DollarSign, ShieldCheck, X, Check, Lock, Sparkles } from 'lucide-react';
+import { API_BASE_URL } from '../lib/apiConfig';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -29,7 +30,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const handleStripeCheckout = async () => {
     setLoadingGateway('stripe');
     try {
-      const res = await fetch('http://localhost:8080/api/v1/billing/stripe/create-checkout', {
+      const res = await fetch(`${API_BASE_URL}/api/v1/billing/stripe/create-checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -59,7 +60,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const handlePayPalCheckout = async () => {
     setLoadingGateway('paypal');
     try {
-      const res = await fetch('http://localhost:8080/api/v1/billing/paypal/create-order', {
+      const res = await fetch(`${API_BASE_URL}/api/v1/billing/paypal/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

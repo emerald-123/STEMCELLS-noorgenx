@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { WHITE_PAPERS, WhitePaperData } from '../constants/whitePapers';
 import { LeadProfile, recordDossierDownload } from '../lib/firebaseDossier';
+import { API_BASE_URL } from '../lib/apiConfig';
 import LeadCaptureModal from './LeadCaptureModal';
 import CheckoutModal from './CheckoutModal';
 
@@ -118,7 +119,7 @@ export default function WhitePaperView() {
   const streamPdf = async () => {
     setIsExporting(true);
     try {
-      const response = await fetch('http://localhost:8080/api/v1/dossier/pdf', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/dossier/pdf`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
