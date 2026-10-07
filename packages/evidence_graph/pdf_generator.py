@@ -1,6 +1,7 @@
 import io
 import time
 import os
+import textwrap
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.platypus import (
@@ -87,16 +88,12 @@ class DynamicPDFDossierGenerator:
             coord_full = (optimal_coords_text or "Diffusion D_m: 0.016 cm²/s | Chemotactic Drift: 0.011 | ECM Stress: 0.1980 kPa")
             claim_full = (target_claim_text or "NT-3 + BDNF + Noggin gradient driving Olig2+/Sox10+ OPC remyelination.")
             
-            # Split claim into 2 lines if long
-            if len(claim_full) > 60:
-                claim_line1 = claim_full[:60]
-                claim_line2 = claim_full[60:120]
-            else:
-                claim_line1 = claim_full
-                claim_line2 = ""
+            wrapped_claim = textwrap.wrap(claim_full, width=58)
+            claim_line1 = wrapped_claim[0] if len(wrapped_claim) > 0 else claim_full
+            claim_line2 = wrapped_claim[1] if len(wrapped_claim) > 1 else ""
 
             d.add(String(230, 80, "Optimal Morphogen Factor Pairing & Tensors:", fontName="Helvetica-Bold", fontSize=7.5, fillColor=colors.HexColor("#38BDF8")))
-            d.add(String(230, 66, f"• Tensors: {coord_full[:68]}", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor("#E2E8F0")))
+            d.add(String(230, 66, f"• Tensors: {coord_full}", fontName="Helvetica", fontSize=6, fillColor=colors.HexColor("#E2E8F0")))
             d.add(String(230, 52, f"• Mechanism: {claim_line1}", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor("#E2E8F0")))
             if claim_line2:
                 d.add(String(238, 40, claim_line2, fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor("#E2E8F0")))
