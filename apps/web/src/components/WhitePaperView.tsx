@@ -174,7 +174,7 @@ export default function WhitePaperView() {
       </head>
       <body>
         <div style="margin-bottom: 15px;">
-          <img src="https://stemcells.noorgenx.com/brand/noorgenx_trademark_official.png" alt="NoorGenX™ Logo" style="height: 48px; width: auto;" />
+          <img src="https://stemcells.noorgenx.com/brand/noorgenx_trademark_clean.png" alt="NoorGenX™ Logo" style="height: 48px; width: auto;" />
         </div>
         <h1>${paper.title}</h1>
         <div className="meta">
@@ -515,7 +515,7 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-4 flex-wrap pb-1">
-              <NoorGenXLogo height={42} />
+              <NoorGenXLogo height={40} />
               <div className="h-8 w-px bg-slate-800 hidden sm:block" />
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-cyanCore/20 text-cyanCore border border-cyanCore/40 uppercase">

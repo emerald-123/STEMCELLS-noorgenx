@@ -8,21 +8,20 @@ interface NoorGenXLogoProps {
 
 export const NoorGenXLogo: React.FC<NoorGenXLogoProps> = ({
   className = '',
-  height = 36,
-  priority = true,
+  height = 34,
 }) => {
-  // Original aspect ratio of the NoorGenX trademark logo is approximately 3.99 : 1
-  const width = Math.round(height * 3.99);
+  // Aspect ratio of official trademark: 3.63 : 1
+  const width = Math.round(height * 3.63);
 
   return (
-    <div className={`inline-flex items-center select-none ${className}`}>
+    <div className={`relative inline-flex items-center select-none ${className}`}>
       <img
-        src="/brand/noorgenx_trademark_official.png"
+        src="/brand/noorgenx_trademark_clean.png"
         alt="NoorGenX™"
-        height={height}
         width={width}
+        height={height}
         style={{ height: `${height}px`, width: `${width}px` }}
-        className="object-contain filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]"
+        className="w-auto object-contain filter drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]"
       />
     </div>
   );
