@@ -31,6 +31,11 @@ import { API_BASE_URL } from '../lib/apiConfig';
 import LeadCaptureModal from './LeadCaptureModal';
 import CheckoutModal from './CheckoutModal';
 import NoorGenXLogo from './brand/NoorGenXLogo';
+import {
+  SynergyHeatmapPreview,
+  ODETimeSeriesChart,
+  UMAPEmbeddingFigure,
+} from './dossier/DossierCharts';
 
 export default function WhitePaperView() {
   const [selectedId, setSelectedId] = useState<string>('bone_marrow_aml');
@@ -668,6 +673,9 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
             ))}
           </div>
         </div>
+
+        {/* Figure 1: 2D Synergy Surface */}
+        <SynergyHeatmapPreview />
       </div>
 
       {/* 3. Mathematical Engine & PDE Diagnostics */}
@@ -704,6 +712,97 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
             <div className="text-slate-500 text-[10px]">Continuum Stress (σ)</div>
             <div className="text-emerald-400 font-bold text-sm">{paper.mathematicalEngine.pdeParameters.tissueStress}</div>
             <div className="text-[10px] text-slate-400">Biomechanical Load</div>
+          </div>
+        </div>
+
+        {/* Embedded Charts: ODE Kinetics + UMAP Trajectory */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <ODETimeSeriesChart />
+          <UMAPEmbeddingFigure />
+        </div>
+
+        {/* Tissue Physical Transport Parameters Table */}
+        <div className="space-y-2 mt-4">
+          <h4 className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
+            Tissue Physical Transport & Identifiability Parameters Table
+          </h4>
+          <div className="overflow-x-auto neu-inset rounded-xl border border-slate-800">
+            <table className="w-full text-xs text-left border-collapse font-mono">
+              <thead>
+                <tr className="bg-slate-900 text-slate-300 border-b border-convexBorder">
+                  <th className="p-2.5">Target Lineage</th>
+                  <th className="p-2.5">Diffusion (D_m cm²/s)</th>
+                  <th className="p-2.5">Chemotactic Drift (μ)</th>
+                  <th className="p-2.5">ECM Stress (kPa)</th>
+                  <th className="p-2.5">FIM Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-convexBorder">
+                <tr className="hover:bg-slate-900/40">
+                  <td className="p-2.5 text-noorEmerald font-bold">Hematopoietic (Bone Marrow LSC)</td>
+                  <td className="p-2.5 text-slate-300">1.42e-06</td>
+                  <td className="p-2.5 text-slate-300">[0.028, 0.011, 0.001]</td>
+                  <td className="p-2.5 text-slate-300">0.0482</td>
+                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (5.25e-3)</td>
+                </tr>
+                <tr className="hover:bg-slate-900/40">
+                  <td className="p-2.5 text-cyanCore font-bold">Corneal (Limbal Epithelium)</td>
+                  <td className="p-2.5 text-slate-300">1.18e-06</td>
+                  <td className="p-2.5 text-slate-300">[0.015, 0.008, 0.000]</td>
+                  <td className="p-2.5 text-slate-300">0.0345</td>
+                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (4.82e-3)</td>
+                </tr>
+                <tr className="hover:bg-slate-900/40">
+                  <td className="p-2.5 text-amber-400 font-bold">Integumentary (Skin Epidermis)</td>
+                  <td className="p-2.5 text-slate-300">2.10e-06</td>
+                  <td className="p-2.5 text-slate-300">[0.032, 0.019, 0.002]</td>
+                  <td className="p-2.5 text-slate-300">0.0812</td>
+                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (4.83e-3)</td>
+                </tr>
+                <tr className="hover:bg-slate-900/40">
+                  <td className="p-2.5 text-red-400 font-bold">Cardiovascular (Cardiac Patch)</td>
+                  <td className="p-2.5 text-slate-300">3.45e-06</td>
+                  <td className="p-2.5 text-slate-300">[0.045, 0.022, 0.005]</td>
+                  <td className="p-2.5 text-slate-300">1.4819</td>
+                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (6.10e-3)</td>
+                </tr>
+                <tr className="hover:bg-slate-900/40">
+                  <td className="p-2.5 text-purple-400 font-bold">Pancreatic (Islet Progenitor)</td>
+                  <td className="p-2.5 text-slate-300">1.85e-06</td>
+                  <td className="p-2.5 text-slate-300">[0.021, 0.012, 0.001]</td>
+                  <td className="p-2.5 text-slate-300">0.1250</td>
+                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (3.95e-3)</td>
+                </tr>
+                <tr className="hover:bg-slate-900/40">
+                  <td className="p-2.5 text-blue-400 font-bold">Neuro (Putamen Dopaminergic)</td>
+                  <td className="p-2.5 text-slate-300">2.60e-06</td>
+                  <td className="p-2.5 text-slate-300">[0.038, 0.015, 0.003]</td>
+                  <td className="p-2.5 text-slate-300">0.2238</td>
+                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (4.12e-3)</td>
+                </tr>
+                <tr className="hover:bg-slate-900/40">
+                  <td className="p-2.5 text-teal-400 font-bold">Auditory (Cochlear Hair Cell)</td>
+                  <td className="p-2.5 text-slate-300">1.25e-06</td>
+                  <td className="p-2.5 text-slate-300">[0.018, 0.009, 0.001]</td>
+                  <td className="p-2.5 text-slate-300">0.1411</td>
+                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (3.80e-3)</td>
+                </tr>
+                <tr className="hover:bg-slate-900/40">
+                  <td className="p-2.5 text-emerald-400 font-bold">Musculoskeletal (Articular Cartilage)</td>
+                  <td className="p-2.5 text-slate-300">3.10e-06</td>
+                  <td className="p-2.5 text-slate-300">[0.040, 0.025, 0.004]</td>
+                  <td className="p-2.5 text-slate-300">1.1221</td>
+                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (5.88e-3)</td>
+                </tr>
+                <tr className="hover:bg-slate-900/40">
+                  <td className="p-2.5 text-sky-400 font-bold">Pulmonary (Alveolar AT2)</td>
+                  <td className="p-2.5 text-slate-300">2.40e-06</td>
+                  <td className="p-2.5 text-slate-300">[0.030, 0.014, 0.002]</td>
+                  <td className="p-2.5 text-slate-300">0.3623</td>
+                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (4.50e-3)</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
