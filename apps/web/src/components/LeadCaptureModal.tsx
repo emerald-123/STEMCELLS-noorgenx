@@ -56,18 +56,54 @@ export default function LeadCaptureModal({
       jobRole,
     };
 
+    const isAdmin = email.trim().toLowerCase() === 'amjad@noorgenx.com' || email.trim().toLowerCase().endsWith('@noorgenx.com');
+
     try {
       await recordDossierDownload(lead, paperId, paperTitle, exportFormat);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cellnoor_lead_profile', JSON.stringify(lead));
+        if (isAdmin) {
+          const ALL_PAPERS = ['bone_marrow_aml', 'corneal_limbal', 'skin_epidermis', 'cardiac_patch', 'pancreatic_islet', 'putamen_dopaminergic', 'cochlear_hair_cell', 'articular_cartilage', 'alveolar_at2'];
+          localStorage.setItem('cellnoor_unlocked_papers', JSON.stringify(ALL_PAPERS));
+        }
+      }
       onSuccessDownload(lead);
       onClose();
     } catch (err) {
       console.error('Lead record submission error:', err);
-      // Fallback: cached locally and proceed
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cellnoor_lead_profile', JSON.stringify(lead));
+        if (isAdmin) {
+          const ALL_PAPERS = ['bone_marrow_aml', 'corneal_limbal', 'skin_epidermis', 'cardiac_patch', 'pancreatic_islet', 'putamen_dopaminergic', 'cochlear_hair_cell', 'articular_cartilage', 'alveolar_at2'];
+          localStorage.setItem('cellnoor_unlocked_papers', JSON.stringify(ALL_PAPERS));
+        }
+      }
       onSuccessDownload(lead);
       onClose();
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleAdminUnlock = async () => {
+    const adminLead: LeadProfile = {
+      email: 'amjad@noorgenx.com',
+      fullName: 'Amjad Sohail (Admin)',
+      institutionOrCompany: 'NoorGenX Ecosystem / Horizon Commerce LLC',
+      jobRole: 'Other',
+    };
+    if (typeof window !== 'undefined') {
+      const ALL_PAPERS = ['bone_marrow_aml', 'corneal_limbal', 'skin_epidermis', 'cardiac_patch', 'pancreatic_islet', 'putamen_dopaminergic', 'cochlear_hair_cell', 'articular_cartilage', 'alveolar_at2'];
+      localStorage.setItem('cellnoor_unlocked_papers', JSON.stringify(ALL_PAPERS));
+      localStorage.setItem('cellnoor_lead_profile', JSON.stringify(adminLead));
+    }
+    try {
+      await recordDossierDownload(adminLead, paperId, paperTitle, exportFormat);
+    } catch (e) {
+      // ignore
+    }
+    onSuccessDownload(adminLead);
+    onClose();
   };
 
   return (
@@ -101,6 +137,21 @@ export default function LeadCaptureModal({
             Enter your professional credentials to instantly generate and stream this audited clinical dossier formatted as{' '}
             <strong className="text-cyanCore uppercase">{exportFormat}</strong> with SHA-256 regulatory provenance.
           </p>
+        </div>
+
+        {/* Admin Quick Unlock Banner */}
+        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-2 text-xs font-mono">
+          <div className="flex items-center gap-2 text-amber-300">
+            <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>Admin Access Mode Available</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleAdminUnlock}
+            className="px-3 py-1.5 rounded-lg font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-all cursor-pointer shadow-md text-[11px] whitespace-nowrap"
+          >
+            ⚡ Unlock All as Admin
+          </button>
         </div>
 
         {/* Form */}

@@ -134,6 +134,18 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         {/* Payment Buttons */}
         <div className="space-y-3 font-mono">
           <button
+            type="button"
+            onClick={() => {
+              if (onSuccessPayment) onSuccessPayment();
+              onClose();
+            }}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer shadow-md"
+          >
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <span>⚡ Admin Bypass: Instant $0 Unlock</span>
+          </button>
+
+          <button
             onClick={handleStripeCheckout}
             disabled={loadingGateway !== null}
             className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 font-bold text-xs uppercase tracking-wider hover:opacity-95 transition-opacity disabled:opacity-50 cursor-pointer shadow-lg shadow-emerald-500/20"

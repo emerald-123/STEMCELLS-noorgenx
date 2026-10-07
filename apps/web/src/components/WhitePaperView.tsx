@@ -304,18 +304,50 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
     else if (format === 'txt') streamTxt();
   };
 
+  const ALL_PAPER_IDS = [
+    'bone_marrow_aml',
+    'corneal_limbal',
+    'skin_epidermis',
+    'cardiac_patch',
+    'pancreatic_islet',
+    'putamen_dopaminergic',
+    'cochlear_hair_cell',
+    'articular_cartilage',
+    'alveolar_at2',
+  ];
+
+  const handleAdminQuickUnlock = () => {
+    const adminLead: LeadProfile = {
+      email: 'amjad@noorgenx.com',
+      fullName: 'Amjad Sohail (Admin & Ecosystem Owner)',
+      institutionOrCompany: 'NoorGenX Ecosystem / Horizon Commerce LLC',
+      jobRole: 'Other',
+    };
+    setCachedLead(adminLead);
+    setUnlockedPapers(ALL_PAPER_IDS);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cellnoor_lead_profile', JSON.stringify(adminLead));
+      localStorage.setItem('cellnoor_unlocked_papers', JSON.stringify(ALL_PAPER_IDS));
+    }
+    setCheckoutNotification('⚡ Admin Entitlement Activated! All 9 Enterprise Clinical Dossiers fully unlocked.');
+  };
+
   // Check localStorage and URL query params on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // 1. Load lead profile
       const storedLead = localStorage.getItem('cellnoor_lead_profile');
+      let leadObj: LeadProfile | null = null;
       if (storedLead) {
         try {
-          setCachedLead(JSON.parse(storedLead));
+          leadObj = JSON.parse(storedLead);
+          setCachedLead(leadObj);
         } catch (e) {
           console.warn('Failed to parse cached lead profile');
         }
       }
+
+      const isAdmin = leadObj?.email?.toLowerCase() === 'amjad@noorgenx.com' || leadObj?.email?.toLowerCase().endsWith('@noorgenx.com');
 
       // 2. Load unlocked papers
       const storedUnlocked = localStorage.getItem('cellnoor_unlocked_papers');
@@ -323,11 +355,17 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
       if (storedUnlocked) {
         try {
           unlockedList = JSON.parse(storedUnlocked);
-          setUnlockedPapers(unlockedList);
         } catch (e) {
           console.warn('Failed to parse unlocked papers');
         }
       }
+
+      if (isAdmin) {
+        unlockedList = ALL_PAPER_IDS;
+        localStorage.setItem('cellnoor_unlocked_papers', JSON.stringify(ALL_PAPER_IDS));
+      }
+
+      setUnlockedPapers(unlockedList);
 
       // 3. Handle URL Checkout Callback (Stripe / PayPal return)
       const params = new URLSearchParams(window.location.search);
@@ -353,14 +391,37 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
     setPendingFormat(format);
 
     // 1. Check if lead profile exists
-    const storedLead = localStorage.getItem('cellnoor_lead_profile');
-    if (!storedLead) {
-      setIsLeadModalOpen(true);
+    const storedLead = typeof window !== 'undefined' ? localStorage.getItem('cellnoor_lead_profile') : null;
+    let lead: LeadProfile | null = cachedLead;
+
+    if (!lead && storedLead) {
+      try {
+        lead = JSON.parse(storedLead);
+        setCachedLead(lead);
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    const isAdmin = lead?.email?.toLowerCase() === 'amjad@noorgenx.com' || lead?.email?.toLowerCase().endsWith('@noorgenx.com');
+
+    if (isAdmin && lead) {
+      if (!unlockedPapers.includes(paper.id)) {
+        const updated = Array.from(new Set([...unlockedPapers, ...ALL_PAPER_IDS]));
+        setUnlockedPapers(updated);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('cellnoor_unlocked_papers', JSON.stringify(updated));
+        }
+      }
+      await recordDossierDownload(lead, paper.id, paper.title, format);
+      executeDownloadStream(format);
       return;
     }
 
-    const lead: LeadProfile = JSON.parse(storedLead);
-    setCachedLead(lead);
+    if (!lead) {
+      setIsLeadModalOpen(true);
+      return;
+    }
 
     // 2. Check if paper is already unlocked in entitlements
     const isUnlocked = unlockedPapers.includes(paper.id);
@@ -458,24 +519,44 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
 
           {/* Lead Authentication & Payment Entitlement Badge */}
           {cachedLead ? (
-            <div className="flex items-center gap-2 text-xs font-mono bg-noorEmerald/10 text-noorEmerald border border-noorEmerald/30 px-2.5 py-1 rounded-lg">
-              <UserCheck className="w-3.5 h-3.5 text-noorEmerald" />
+            <div className={`flex items-center gap-2 text-xs font-mono px-2.5 py-1 rounded-lg border ${
+              cachedLead.email.toLowerCase() === 'amjad@noorgenx.com' || cachedLead.email.toLowerCase().endsWith('@noorgenx.com')
+                ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                : 'bg-noorEmerald/10 text-noorEmerald border-noorEmerald/30'
+            }`}>
+              {cachedLead.email.toLowerCase() === 'amjad@noorgenx.com' || cachedLead.email.toLowerCase().endsWith('@noorgenx.com') ? (
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              ) : (
+                <UserCheck className="w-3.5 h-3.5 text-noorEmerald" />
+              )}
               <span>
-                Verified: <strong>{cachedLead.email}</strong> ({cachedLead.jobRole})
+                Verified: <strong>{cachedLead.email}</strong>{' '}
+                {cachedLead.email.toLowerCase() === 'amjad@noorgenx.com' || cachedLead.email.toLowerCase().endsWith('@noorgenx.com')
+                  ? '(👑 ALL 9 DOSSIERS UNLOCKED)'
+                  : `(${cachedLead.jobRole})`}
               </span>
               <button
                 onClick={handleClearLeadIdentity}
                 title="Switch Lead Profile"
-                className="text-slate-400 hover:text-slate-200 ml-1 border-l border-noorEmerald/30 pl-1.5 flex items-center gap-0.5"
+                className="text-slate-400 hover:text-slate-200 ml-1 border-l border-slate-700 pl-1.5 flex items-center gap-0.5"
               >
                 <RefreshCw className="w-3 h-3 text-slate-400" />
               </button>
             </div>
           ) : (
-            <span className="text-xs font-mono text-cyanCore flex items-center gap-1 bg-cyanCore/10 px-2.5 py-1 rounded-lg border border-cyanCore/30">
-              <ShieldCheck className="w-3.5 h-3.5 text-cyanCore" />
-              Stripe & PayPal Gate Active ($495 / dossier)
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono text-cyanCore flex items-center gap-1 bg-cyanCore/10 px-2.5 py-1 rounded-lg border border-cyanCore/30">
+                <ShieldCheck className="w-3.5 h-3.5 text-cyanCore" />
+                Stripe & PayPal Gate Active ($495 / dossier)
+              </span>
+              <button
+                onClick={handleAdminQuickUnlock}
+                className="text-xs font-mono font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-md"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-slate-950" />
+                <span>⚡ Unlock All as Admin</span>
+              </button>
+            </div>
           )}
         </div>
 
