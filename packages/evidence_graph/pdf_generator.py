@@ -39,8 +39,8 @@ class DynamicPDFDossierGenerator:
         fig_title = "Figure 1: Spatio-temporal drug-ratio synergy surface (Bliss model)" if is_oncology else "Figure 1: Morphogen Concentration Field & Directional Ingrowth Tensor"
         fig_badge = f"Max Bliss Excess: +{max_bliss_excess:.3f} (Sweet Spot)" if is_oncology else f"Max Factor Efficiency: +{max_bliss_excess:.3f}"
         
-        d.add(String(12, 110, fig_title, fontName="Helvetica-Bold", fontSize=9, fillColor=colors.HexColor("#38BDF8")))
-        d.add(String(310, 110, fig_badge, fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor("#10B981")))
+        d.add(String(12, 110, fig_title, fontName="Helvetica-Bold", fontSize=8.5, fillColor=colors.HexColor("#38BDF8")))
+        d.add(String(350, 110, fig_badge, fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor("#10B981")))
 
         start_x = 45
         start_y = 15
@@ -84,16 +84,23 @@ class DynamicPDFDossierGenerator:
             d.add(String(238, 40, "mitochondrial apoptosis in persistent LSCs (S2).", fontName="Helvetica", fontSize=7.5, fillColor=colors.HexColor("#E2E8F0")))
             d.add(String(230, 26, "Caption: High-res Bliss excess surface map pinpointing optimal kill zone.", fontName="Helvetica-Oblique", fontSize=7, fillColor=colors.HexColor("#94A3B8")))
         else:
-            coord_line = (optimal_coords_text or "Factor pairing optimized for directional ingrowth")[:55]
-            claim_line1 = (target_claim_text or "Regenerative morphogen ratio driving lineage maturation.")[:55]
-            claim_line2 = (target_claim_text or "")[55:110]
+            coord_full = (optimal_coords_text or "Diffusion D_m: 0.016 cm²/s | Chemotactic Drift: 0.011 | ECM Stress: 0.1980 kPa")
+            claim_full = (target_claim_text or "NT-3 + BDNF + Noggin gradient driving Olig2+/Sox10+ OPC remyelination.")
+            
+            # Split claim into 2 lines if long
+            if len(claim_full) > 60:
+                claim_line1 = claim_full[:60]
+                claim_line2 = claim_full[60:120]
+            else:
+                claim_line1 = claim_full
+                claim_line2 = ""
 
-            d.add(String(230, 80, "Optimal Morphogen Factor Pairing:", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor("#38BDF8")))
-            d.add(String(230, 66, f"• {coord_line}", fontName="Helvetica", fontSize=7.5, fillColor=colors.HexColor("#E2E8F0")))
-            d.add(String(230, 52, f"• Mechanism: {claim_line1}", fontName="Helvetica", fontSize=7.5, fillColor=colors.HexColor("#E2E8F0")))
+            d.add(String(230, 80, "Optimal Morphogen Factor Pairing & Tensors:", fontName="Helvetica-Bold", fontSize=7.5, fillColor=colors.HexColor("#38BDF8")))
+            d.add(String(230, 66, f"• Tensors: {coord_full[:68]}", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor("#E2E8F0")))
+            d.add(String(230, 52, f"• Mechanism: {claim_line1}", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor("#E2E8F0")))
             if claim_line2:
-                d.add(String(238, 40, claim_line2, fontName="Helvetica", fontSize=7.5, fillColor=colors.HexColor("#E2E8F0")))
-            d.add(String(230, 26, "Caption: High-res morphogen concentration field & directional guidance tensor.", fontName="Helvetica-Oblique", fontSize=7, fillColor=colors.HexColor("#94A3B8")))
+                d.add(String(238, 40, claim_line2, fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor("#E2E8F0")))
+            d.add(String(230, 26, "Caption: High-res morphogen concentration field & directional guidance tensor.", fontName="Helvetica-Oblique", fontSize=6.5, fillColor=colors.HexColor("#94A3B8")))
 
         return d
 
@@ -446,13 +453,33 @@ class DynamicPDFDossierGenerator:
             [Paragraph("Auditory (Cochlear Hair Cell)", body_style), Paragraph("1.25e-06", body_style), Paragraph("[0.018, 0.009, 0.001]", body_style), Paragraph("0.1411", body_style), Paragraph("<font color='#15803D'><b>IDENTIFIABLE (3.80e-3)</b></font>", body_style)],
             [Paragraph("Musculoskeletal (Articular Cartilage)", body_style), Paragraph("3.10e-06", body_style), Paragraph("[0.040, 0.025, 0.004]", body_style), Paragraph("1.1221", body_style), Paragraph("<font color='#15803D'><b>IDENTIFIABLE (5.88e-3)</b></font>", body_style)],
             [Paragraph("Pulmonary (Alveolar AT2)", body_style), Paragraph("2.40e-06", body_style), Paragraph("[0.030, 0.014, 0.002]", body_style), Paragraph("0.3623", body_style), Paragraph("<font color='#15803D'><b>IDENTIFIABLE (4.50e-3)</b></font>", body_style)],
+            [Paragraph("Neural (Spinal Cord / OPC)", body_style), Paragraph("1.60e-06", body_style), Paragraph("[0.026, 0.012, 0.002]", body_style), Paragraph("0.1980", body_style), Paragraph("<font color='#15803D'><b>IDENTIFIABLE (4.65e-3)</b></font>", body_style)],
         ]
-        tissue_table = Table(tissue_table_data, colWidths=[2.2 * inch, 1.2 * inch, 1.4 * inch, 1.0 * inch, 1.4 * inch])
-        tissue_table.setStyle(TableStyle([
+        
+        table_style_cmd = [
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#F1F5F9")),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E1")),
             ('PADDING', (0, 0), (-1, -1), 4),
-        ]))
+        ]
+        
+        lineage_row_map = {
+            "hematology": 1, "bone_marrow_aml": 1,
+            "ophthalmic": 2, "corneal_limbal": 2,
+            "integumentary": 3, "skin_epidermis": 3,
+            "cardiovascular": 4, "cardiac_patch": 4,
+            "endocrine": 5, "pancreatic_islet": 5,
+            "neuro": 6, "putamen_dopaminergic": 6,
+            "auditory": 7, "cochlear_hair_cell": 7,
+            "musculoskeletal": 8, "articular_cartilage": 8,
+            "pulmonary": 9, "alveolar_at2": 9,
+            "spinal_cord": 10, "spinal": 10,
+        }
+        active_idx = lineage_row_map.get((paper_id or "").lower().strip())
+        if active_idx and active_idx < len(tissue_table_data):
+            table_style_cmd.append(('BACKGROUND', (0, active_idx), (-1, active_idx), colors.HexColor("#ECFDF5")))
+
+        tissue_table = Table(tissue_table_data, colWidths=[2.2 * inch, 1.2 * inch, 1.4 * inch, 1.0 * inch, 1.4 * inch])
+        tissue_table.setStyle(TableStyle(table_style_cmd))
         story.append(tissue_table)
         story.append(Spacer(1, 6))
 

@@ -935,12 +935,19 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
                   <td className="p-2.5 text-slate-300">1.1221</td>
                   <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (5.88e-3)</td>
                 </tr>
-                <tr className="hover:bg-slate-900/40">
+                <tr className={`hover:bg-slate-900/40 ${paper.id === 'pulmonary' || paper.id === 'alveolar_at2' ? 'bg-noorEmerald/10 border-l-2 border-noorEmerald' : ''}`}>
                   <td className="p-2.5 text-sky-400 font-bold">Pulmonary (Alveolar AT2)</td>
                   <td className="p-2.5 text-slate-300">2.40e-06</td>
                   <td className="p-2.5 text-slate-300">[0.030, 0.014, 0.002]</td>
                   <td className="p-2.5 text-slate-300">0.3623</td>
                   <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (4.50e-3)</td>
+                </tr>
+                <tr className={`hover:bg-slate-900/40 ${paper.id === 'spinal_cord' || paper.id === 'neural' ? 'bg-noorEmerald/10 border-l-2 border-noorEmerald' : ''}`}>
+                  <td className="p-2.5 text-indigo-400 font-bold">Neural (Spinal Cord / OPC)</td>
+                  <td className="p-2.5 text-slate-300">1.60e-06</td>
+                  <td className="p-2.5 text-slate-300">[0.026, 0.012, 0.002]</td>
+                  <td className="p-2.5 text-slate-300">0.1980</td>
+                  <td className="p-2.5 text-noorEmerald font-bold">IDENTIFIABLE (4.65e-3)</td>
                 </tr>
               </tbody>
             </table>

@@ -365,7 +365,7 @@ DOSSIER_DATA = {
         "sample_id": "LINEAGE_CELL_OPC_SCI_2026",
         "lineage_cells": "Olig2+ Oligodendrocyte Progenitor Cells (OPCs) & Motor Neural Stem Cells",
         "figure1_title": "Figure 1: Stereotactic Axonal Guidance Tensors & OPC Remyelination",
-        "optimal_coords": "Diffusion D_m: 0.016 cm²/s | Chemotactic Drift: 0.011 | Stress: 0.1980 kPa",
+        "optimal_coords": "Diffusion D_m: 0.016 cm²/s | Chemotactic Drift: 0.011 | ECM Stress: 0.1980 kPa",
         "max_bliss_excess": 0.395,
         "fim_min_eig": 0.00465,
         "fim_status": "IDENTIFIABLE (4.65e-3)",
