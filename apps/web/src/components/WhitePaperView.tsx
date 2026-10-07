@@ -85,6 +85,7 @@ export default function WhitePaperView() {
           pde_num_cells: 64,
           pde_stress_sigma: parseFloat(paper.mathematicalEngine.pdeParameters.tissueStress) || 0.0482,
           pde_velocity_vector: paper.mathematicalEngine.pdeParameters.chemotacticDrift,
+          dossier_category: paper.category.toUpperCase(),
         }),
       });
 

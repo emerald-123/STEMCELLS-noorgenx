@@ -167,6 +167,7 @@ def generate_pdf_dossier(payload: Dict[str, Any] = None):
     pde_num_cells = payload.get("pde_num_cells", 60)
     pde_stress_sigma = payload.get("pde_stress_sigma", 0.0482)
     pde_velocity_vector = payload.get("pde_velocity_vector", "[0.028, 0.011, 0.001]")
+    dossier_category = payload.get("dossier_category", "ONCOLOGY / AML FLAGSHIP")
 
     pdf_bytes = pdf_generator.generate_pdf_bytes(
         sample_id=sample_id,
@@ -184,6 +185,7 @@ def generate_pdf_dossier(payload: Dict[str, Any] = None):
         pde_num_cells=pde_num_cells,
         pde_stress_sigma=pde_stress_sigma,
         pde_velocity_vector=pde_velocity_vector,
+        dossier_category=dossier_category,
     )
 
     return Response(

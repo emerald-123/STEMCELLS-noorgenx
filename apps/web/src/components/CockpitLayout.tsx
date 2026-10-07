@@ -39,6 +39,28 @@ export default function CockpitLayout() {
     setActiveNav('virtual_lab');
   };
 
+  const getDynamicBadge = () => {
+    if (activeNav === 'white_paper' || activeTab === 'paper') {
+      return { label: 'v1.0 Clinical Dossier Suite', color: 'bg-cyanCore/20 text-cyanCore border-cyanCore/40' };
+    }
+    switch (activeTab) {
+      case 'simulator':
+      case 'umap':
+      case 'synergy':
+        return { label: 'v1.0 AML Flagship', color: 'bg-noorEmerald/20 text-noorEmerald border-noorEmerald/40' };
+      case 'pde':
+        return { label: 'v1.0 Regenerative PDE Engine', color: 'bg-sky-500/20 text-sky-300 border-sky-500/40' };
+      case 'vcf':
+        return { label: 'v1.0 Patient Twin Pipeline', color: 'bg-purple-500/20 text-purple-300 border-purple-500/40' };
+      case 'dock':
+        return { label: 'v1.0 AI Docking Arena', color: 'bg-amber-500/20 text-amber-300 border-amber-500/40' };
+      default:
+        return { label: 'v1.0 Enterprise Suite', color: 'bg-noorEmerald/20 text-noorEmerald border-noorEmerald/40' };
+    }
+  };
+
+  const currentBadge = getDynamicBadge();
+
   return (
     <div className="flex flex-col h-screen w-screen bg-void overflow-hidden text-slate-100">
       {/* Top Sovereign Bar */}
@@ -51,8 +73,8 @@ export default function CockpitLayout() {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold tracking-wider text-slate-100 text-sm font-mono">CELLNOOR</span>
-              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-noorEmerald/20 text-noorEmerald border border-noorEmerald/40 font-semibold">
-                v1.0 AML Flagship
+              <span className={`px-1.5 py-0.2 rounded text-[10px] font-mono border font-semibold ${currentBadge.color}`}>
+                {currentBadge.label}
               </span>
             </div>
             <div className="text-[10px] text-slate-400 font-mono flex items-center gap-2">

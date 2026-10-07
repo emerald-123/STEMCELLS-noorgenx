@@ -38,7 +38,8 @@ class DynamicPDFDossierGenerator:
         pde_tissue_name: str = "Corneal_Limbal_Epithelium",
         pde_num_cells: int = 60,
         pde_stress_sigma: float = 0.0482,
-        pde_velocity_vector: str = "[0.028, 0.011, 0.001]"
+        pde_velocity_vector: str = "[0.028, 0.011, 0.001]",
+        dossier_category: str = "ONCOLOGY / AML FLAGSHIP"
     ) -> bytes:
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(
@@ -119,7 +120,7 @@ class DynamicPDFDossierGenerator:
             story.append(RLImage(logo_path, width=2.4 * inch, height=0.66 * inch))
             story.append(Spacer(1, 8))
 
-        story.append(Paragraph("CELLNOOR (v1.0 AML FLAGSHIP)", title_style))
+        story.append(Paragraph(f"CELLNOOR: {dossier_category.upper()} TARGET VALIDATION DOSSIER", title_style))
         story.append(Paragraph("Executive Investment & Clinical Research Dossier", subtitle_style))
         story.append(Paragraph("Horizon Commerce LLC (Lorton, VA; UEI: NY9AHGK2BBZ7) | Ecosystem: NoorGenX Platform Suite", subtitle_style))
         story.append(Paragraph('"No cancer left behind. Every patient has a cure."', motto_style))
