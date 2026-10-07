@@ -165,122 +165,32 @@ export default function WhitePaperView({ activeLineage, onSelectLineage }: White
     }
   };
 
-  const streamDocx = () => {
-    const htmlContent = `
-      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-      <head>
-        <meta charset='utf-8'>
-        <title>${paper.title}</title>
-        <style>
-          body { font-family: Arial, sans-serif; color: #0F172A; line-height: 1.5; padding: 20px; }
-          h1 { color: #0E7490; font-size: 20pt; margin-bottom: 5px; }
-          h2 { color: #0F172A; font-size: 14pt; border-bottom: 2px solid #0E7490; padding-bottom: 4px; margin-top: 20px; }
-          .meta { color: #64748B; font-size: 9pt; margin-bottom: 15px; }
-          .motto { color: #10B981; font-style: italic; font-weight: bold; margin-bottom: 20px; }
-          .summary-box { background: #F8FAFC; border: 1px solid #CBD5E1; padding: 12px; margin-bottom: 15px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-          th, td { border: 1px solid #CBD5E1; padding: 8px; text-align: left; font-size: 9.5pt; }
-          th { background: #F1F5F9; }
-          .code-box { background: #0F172A; color: #38BDF8; font-family: monospace; padding: 10px; font-size: 9pt; }
-        </style>
-      </head>
-      <body>
-        <div style="margin-bottom: 15px;">
-          <img src="https://stemcells.noorgenx.com/brand/noorgenx_trademark_clean.png" alt="NoorGenX™ Logo" style="height: 48px; width: auto;" />
-        </div>
-        <h1>${paper.title}</h1>
-        <div className="meta">
-          <strong>Category:</strong> ${paper.category} | <strong>Published:</strong> ${paper.publishedDate}<br/>
-          <strong>Operating Entity:</strong> Horizon Commerce LLC (Lorton, VA; UEI: NY9AHGK2BBZ7)<br/>
-          <strong>Ecosystem:</strong> NoorGenX Platform Suite (amjad@noorgenx.com)
-        </div>
-        <div className="motto">"No cancer left behind. Every patient has a cure."</div>
+  const streamDocx = async () => {
+    setIsExporting(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/dossier/export?paper_id=${paper.id}&format=docx`, {
+        method: 'GET',
+      });
 
-        <div className="summary-box">
-          <strong>Indication:</strong> ${paper.indication}<br/>
-          <strong>Addressable Market:</strong> ${paper.marketSize}<br/>
-          <strong>Estimated Value / ROI:</strong> ${paper.estimatedRoi}<br/><br/>
-          <strong>Executive Summary:</strong> ${paper.executiveSummary}
-        </div>
+      if (!response.ok) {
+        throw new Error('DOCX Generation API request failed');
+      }
 
-        <h2>1. Clinical Problem & Mechanism</h2>
-        <p>${paper.clinicalProblem.description}</p>
-        <p><strong>Key Mechanisms:</strong></p>
-        <ul>
-          ${paper.clinicalProblem.keyMechanisms.map((m) => `<li>${m}</li>`).join('')}
-        </ul>
-        <p><strong>Cell State Dynamics:</strong></p>
-        <ul>
-          ${paper.clinicalProblem.cellStateDynamics.map((d) => `<li>${d}</li>`).join('')}
-        </ul>
-
-        <h2>2. Mathematical Engine & PDE Dynamics</h2>
-        <div className="code-box">${paper.mathematicalEngine.systemEquation}</div>
-        <p>
-          <strong>Fisher Information Matrix Min Eigenvalue (λ_min):</strong> ${paper.mathematicalEngine.fimEigenvalue} [${paper.mathematicalEngine.identifiabilityStatus}]<br/>
-          <strong>Diffusion D_m:</strong> ${paper.mathematicalEngine.pdeParameters.diffusionD_m} | 
-          <strong>Chemotactic Drift:</strong> ${paper.mathematicalEngine.pdeParameters.chemotacticDrift} | 
-          <strong>Tissue Stress:</strong> ${paper.mathematicalEngine.pdeParameters.tissueStress}
-        </p>
-
-        <h2>3. Benchmark Audit Metrics</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Metric</th>
-              <th>CellNoor Score</th>
-              <th>Standard Baseline</th>
-              <th>Net Superiority</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${paper.benchmarkMetrics
-              .map(
-                (b) => `
-              <tr>
-                <td>${b.name}</td>
-                <td><b>${b.cellNoorScore}</b></td>
-                <td>${b.standardBaseline}</td>
-                <td><font color="#10B981"><b>${b.netSuperiority}</b></font></td>
-              </tr>
-            `
-              )
-              .join('')}
-          </tbody>
-        </table>
-
-        <h2>4. Regulatory Audit & Safety Gate</h2>
-        <p>
-          <strong>Sample Accession:</strong> ${paper.regulatoryAudit.sampleId}<br/>
-          <strong>FDA CBER Teratoma Hazard (S_teratoma):</strong> ${paper.regulatoryAudit.teratomaScore} [${paper.regulatoryAudit.teratomaStatus}]<br/>
-          <strong>Karyotype Instability:</strong> ${paper.regulatoryAudit.karyotypeScore}<br/>
-          <strong>Differential Vulnerability Ratio (DVR):</strong> ${paper.regulatoryAudit.dvrSelectivity} [${paper.regulatoryAudit.normalSelectivityStatus}]
-        </p>
-
-        <h2>5. Multi-Omics Evidence Graph</h2>
-        <p><strong>Supporting Evidence:</strong></p>
-        <ul>${paper.evidenceGraph.supporting.map((s) => `<li>${s}</li>`).join('')}</ul>
-        <p><strong>Contradicting Evidence:</strong></p>
-        <ul>${paper.evidenceGraph.contradicting.map((c) => `<li>${c}</li>`).join('')}</ul>
-        <p><strong>Weakest Link:</strong> ${paper.evidenceGraph.weakestLink}</p>
-
-        <hr/>
-        <p className="meta">Horizon Commerce LLC | License Clearance Verified | NoorGenX Platform Suite</p>
-      </body>
-      </html>
-    `;
-
-    const blob = new Blob(['\ufeff' + htmlContent], {
-      type: 'application/vnd.ms-word;charset=utf-8',
-    });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `CellNoor_Executive_Dossier_${paper.id.toUpperCase()}.docx`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `CellNoor_Executive_Dossier_${paper.id.toUpperCase()}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.warn('Backend API fallback triggered for DOCX download:', err);
+      streamTxt();
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const streamTxt = () => {
