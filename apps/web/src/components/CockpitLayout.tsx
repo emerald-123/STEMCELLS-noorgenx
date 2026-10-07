@@ -44,7 +44,7 @@ export default function CockpitLayout() {
       {/* Top Sovereign Bar */}
       <header className="h-14 border-b border-convexBorder bg-slateElevated/90 px-5 flex items-center justify-between z-20">
         <div className="flex items-center gap-3">
-          <NoorGenXLogo className="h-8" />
+          <NoorGenXLogo height={32} />
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-noorEmerald via-cyanCore to-blue-600 flex items-center justify-center font-black text-slate-950 text-sm shadow-glowEmerald">
             CN
           </div>

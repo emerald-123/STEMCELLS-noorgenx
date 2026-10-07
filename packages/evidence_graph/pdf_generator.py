@@ -114,9 +114,9 @@ class DynamicPDFDossierGenerator:
         story = []
 
         # 1. Top Left Brand Logo & Header Banner
-        logo_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "apps", "web", "public", "brand", "noorgenx_logo_clean.png")
+        logo_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "apps", "web", "public", "brand", "noorgenx_trademark_official.png")
         if os.path.exists(logo_path):
-            story.append(RLImage(logo_path, width=2.4 * inch, height=0.6 * inch))
+            story.append(RLImage(logo_path, width=2.4 * inch, height=0.66 * inch))
             story.append(Spacer(1, 8))
 
         story.append(Paragraph("CELLNOOR (v1.0 AML FLAGSHIP)", title_style))
