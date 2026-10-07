@@ -84,9 +84,9 @@ export default function LeadCaptureModal({
         <div className="space-y-2 pr-8">
           <div className="flex items-center gap-2">
             <img
-              src="/brand/noorgenx-logo-white.png"
+              src="/brand/noorgenx-official-logo.png"
               alt="NoorGenX Logo"
-              className="h-10 w-auto object-contain shrink-0"
+              className="h-9 w-auto object-contain shrink-0"
             />
             <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyanCore/20 text-cyanCore border border-cyanCore/40 uppercase flex items-center gap-1">
               <Lock className="w-3 h-3 text-cyanCore" />

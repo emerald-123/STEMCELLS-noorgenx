@@ -517,7 +517,7 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
               <img
                 src="/brand/noorgenx-official-logo.png"
                 alt="NoorGenX™ Logo"
-                className="h-14 md:h-16 w-auto object-contain shrink-0"
+                className="h-12 md:h-14 w-auto object-contain shrink-0"
               />
               <div className="h-8 w-px bg-slate-800 hidden sm:block" />
               <div className="flex items-center gap-2 flex-wrap">
