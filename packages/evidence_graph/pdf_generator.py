@@ -535,8 +535,9 @@ class DynamicPDFDossierGenerator:
 
         # 8. Compliance & Provenance Footer
         story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#CBD5E1"), spaceAfter=4))
+        lineage_stamp = d_info.get("id", paper_id).upper()
         footer_text = (
-            f"Lineage: {paper_id.upper()} | Accession: {sample_id} | Operator: amjad@noorgenx.com<br/>"
+            f"Lineage: <b>{lineage_stamp}</b> | Accession: {sample_id} | Operator: amjad@noorgenx.com<br/>"
             f"License Clearance: ESMFold / Evo2 / AlphaGenome (COMMERCIAL CLEARANCE VERIFIED)<br/>"
             f"Generated: {time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}"
         )
