@@ -12,8 +12,9 @@ pdf_generator = DynamicPDFDossierGenerator()
 @router.get("/export")
 @router.post("/export")
 async def export_dossier(
-    paper_id: str = Query("bone_marrow_aml", description="Lineage ID, e.g., hematology, ophthalmic, cardiac, neuro, endocrine, corneal_limbal"),
-    format: str = Query("pdf", regex="^(pdf|docx|txt)$")
+    paper_id: str = Query("bone_marrow_aml", description="Lineage ID, e.g., hematology, ophthalmic, cardiac, neuro, endocrine, corneal_limbal, spinal_cord, musculoskeletal, pulmonary"),
+    format: str = Query("pdf", pattern="^(pdf|docx|txt)$"),
+    scope: str = Query("full", pattern="^(summary|full)$")
 ):
     normalized_id = paper_id.lower().strip()
     data = get_dossier_data(normalized_id)
@@ -21,18 +22,19 @@ async def export_dossier(
     if not data:
         raise HTTPException(status_code=404, detail=f"Lineage dossier '{paper_id}' not found.")
 
-    filename = f"CellNoor_Executive_Dossier_{normalized_id.upper()}.{format}"
+    doc_prefix = "Technical_Dossier" if scope == "full" else "Executive_Brief"
+    filename = f"CellNoor_{doc_prefix}_{normalized_id.upper()}.{format}"
 
     if format == "pdf":
-        pdf_bytes = pdf_generator.generate_pdf_bytes(paper_id=normalized_id)
+        pdf_bytes = pdf_generator.generate_pdf_bytes(paper_id=normalized_id, scope=scope)
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
             headers={"Content-Disposition": f"attachment; filename={filename}"}
         )
     elif format == "docx":
-        docx_buffer = generate_lineage_docx(data, normalized_id)
-        filename = f"CellNoor_Executive_Dossier_{normalized_id.upper()}.docx"
+        docx_buffer = generate_lineage_docx(data, normalized_id, scope=scope)
+        filename = f"CellNoor_{doc_prefix}_{normalized_id.upper()}.docx"
         return Response(
             content=docx_buffer.getvalue(),
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",

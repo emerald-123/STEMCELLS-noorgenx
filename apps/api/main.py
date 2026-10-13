@@ -30,6 +30,7 @@ from packages.core_sdk import CoreSDKClient
 from workflows.aml_menin import AMLMeninWorkflowPipeline
 from apps.api.routers.billing import router as billing_router
 from apps.api.routers.export import router as export_router
+from apps.api.routers.patient_diagnostic import router as patient_diagnostic_router
 
 app = FastAPI(
     title="CellNoor API",
@@ -39,13 +40,26 @@ app = FastAPI(
 
 app.include_router(billing_router)
 app.include_router(export_router)
+app.include_router(patient_diagnostic_router)
+
+import os as _os
+
+# Production CORS: read from ALLOWED_ORIGINS env var (comma-separated list).
+# Example Cloud Run flag:
+#   --set-env-vars ALLOWED_ORIGINS="https://cellnoor.web.app,https://flt3-insight.noorgenx.com"
+# Falls back to localhost for local development.
+_raw_origins = _os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:3000,http://localhost:8000"
+)
+_allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-Request-ID"],
 )
 
 pipeline = AMLMeninWorkflowPipeline()
@@ -148,7 +162,7 @@ def evaluate_teratoma_risk(payload: Dict[str, Any]):
 
 @app.get("/api/v1/dossier/pdf")
 @app.post("/api/v1/dossier/pdf")
-def generate_pdf_dossier(payload: Dict[str, Any] = None):
+def generate_pdf_dossier(payload: Dict[str, Any] = None, scope: str = "full"):
     if payload is None:
         payload = {}
 
@@ -171,6 +185,7 @@ def generate_pdf_dossier(payload: Dict[str, Any] = None):
     pde_stress_sigma = payload.get("pde_stress_sigma")
     pde_velocity_vector = payload.get("pde_velocity_vector")
     dossier_category = payload.get("dossier_category")
+    doc_scope = payload.get("scope") or scope or "full"
 
     pdf_bytes = pdf_generator.generate_pdf_bytes(
         paper_id=paper_id,
@@ -190,6 +205,7 @@ def generate_pdf_dossier(payload: Dict[str, Any] = None):
         pde_stress_sigma=pde_stress_sigma,
         pde_velocity_vector=pde_velocity_vector,
         dossier_category=dossier_category,
+        scope=doc_scope
     )
 
     filename = f"CellNoor_Executive_Dossier_{paper_id.upper()}.pdf"

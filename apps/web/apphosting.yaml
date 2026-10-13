@@ -1,0 +1,35 @@
+# Firebase App Hosting configuration for CellNoor Next.js frontend
+# Docs: https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  # Cloud Run concurrency per instance
+  concurrency: 80
+  # CPU (1 = 1 vCPU) — stays in free tier for low traffic
+  cpu: 1
+  # Memory in MiB
+  memoryMiB: 512
+  # Max instances — cap at 1 to stay $0 for research traffic
+  maxInstances: 1
+  # Minimum instances — 0 means scale to zero (no idle cost)
+  minInstances: 0
+
+env:
+  # Cloud Run backend URL — set this after deploying the FastAPI service
+  - variable: NEXT_PUBLIC_API_URL
+    value: https://cellnoor-api-PLACEHOLDER.run.app
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Phase 3 guard — patient upload is research-only prototype
+  - variable: NEXT_PUBLIC_PHASE_3_STATUS
+    value: "NO-GO"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_ENABLE_PATIENT_UPLOAD
+    value: "false"
+    availability:
+      - BUILD
+      - RUNTIME

@@ -1,7 +1,7 @@
 # Multi-stage Dockerfile for CellNoor Google Cloud Run deployment
 
 # Stage 1: Build FastAPI Backend & Python Packages
-FROM python:3.11-slim as backend-builder
+FROM python:3.11-slim AS backend-builder
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -26,9 +26,12 @@ COPY --from=backend-builder /usr/local/lib/python3.11/site-packages /usr/local/l
 COPY --from=backend-builder /usr/local/bin /usr/local/bin
 COPY --from=backend-builder /app /app
 
-ENV PORT=8080
 ENV PYTHONPATH=/app
+
+# Cloud Run injects $PORT at runtime (default 8080 for local testing)
+ENV PORT=8080
 
 EXPOSE 8080
 
-CMD ["uvicorn", "apps.api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Use shell form so $PORT env var is expanded at runtime
+CMD uvicorn apps.api.main:app --host 0.0.0.0 --port ${PORT}

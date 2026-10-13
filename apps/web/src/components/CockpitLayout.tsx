@@ -23,6 +23,7 @@ import WhitePaperView from './WhitePaperView';
 import WhitePaperStudy from './WhitePaperStudy';
 import SynergyHeatmapViewer from './SynergyHeatmapViewer';
 import PatientVcfUploader from './PatientVcfUploader';
+import PatientReportIngestion from './PatientReportIngestion';
 import MultiscalePDEViewer from './MultiscalePDEViewer';
 
 import NoorGenXLogo from './brand/NoorGenXLogo';
@@ -242,7 +243,10 @@ export default function CockpitLayout() {
           ) : activeTab === 'synergy' ? (
             <SynergyHeatmapViewer />
           ) : activeTab === 'vcf' ? (
-            <PatientVcfUploader onIngestComplete={handleIngestComplete} />
+            <div className="space-y-6">
+              <PatientReportIngestion />
+              <PatientVcfUploader onIngestComplete={handleIngestComplete} />
+            </div>
           ) : activeTab === 'pde' ? (
             <MultiscalePDEViewer />
           ) : (

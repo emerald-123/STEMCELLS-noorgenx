@@ -136,11 +136,14 @@ export default function WhitePaperView({ activeLineage, onSelectLineage }: White
     }
   };
 
+  const [dossierScope, setDossierScope] = useState<'summary' | 'full'>('full');
+
   // Direct Stream Handlers
-  const streamPdf = async () => {
+  const streamPdf = async (scopeOverride?: 'summary' | 'full') => {
+    const scopeVal = scopeOverride || dossierScope;
     setIsExporting(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/dossier/export?paper_id=${paper.id}&format=pdf`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/dossier/export?paper_id=${paper.id}&format=pdf&scope=${scopeVal}`, {
         method: 'GET',
       });
 
@@ -152,7 +155,8 @@ export default function WhitePaperView({ activeLineage, onSelectLineage }: White
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `CellNoor_Executive_Dossier_${paper.id.toUpperCase()}.pdf`;
+      const prefix = scopeVal === 'full' ? 'Technical_Dossier' : 'Executive_Brief';
+      a.download = `CellNoor_${prefix}_${paper.id.toUpperCase()}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -165,10 +169,11 @@ export default function WhitePaperView({ activeLineage, onSelectLineage }: White
     }
   };
 
-  const streamDocx = async () => {
+  const streamDocx = async (scopeOverride?: 'summary' | 'full') => {
+    const scopeVal = scopeOverride || dossierScope;
     setIsExporting(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/dossier/export?paper_id=${paper.id}&format=docx`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/dossier/export?paper_id=${paper.id}&format=docx&scope=${scopeVal}`, {
         method: 'GET',
       });
 
@@ -180,7 +185,8 @@ export default function WhitePaperView({ activeLineage, onSelectLineage }: White
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `CellNoor_Executive_Dossier_${paper.id.toUpperCase()}.docx`;
+      const prefix = scopeVal === 'full' ? 'Technical_Dossier' : 'Executive_Brief';
+      a.download = `CellNoor_${prefix}_${paper.id.toUpperCase()}.docx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -593,35 +599,62 @@ Generated via CellNoor Platform Suite | Horizon Commerce LLC (amjad@noorgenx.com
             </h1>
           </div>
 
-          {/* Export Tray */}
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => handleExportClick('pdf')}
-              disabled={isExporting}
-              className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-cyanCore border border-cyanCore/40 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-              title="Download Executive PDF Dossier"
-            >
-              <Download className="w-3.5 h-3.5 text-cyanCore" />
-              <span>{isExporting ? 'Generating...' : 'PDF (.pdf)'}</span>
-            </button>
+          {/* Export Tray & Scope Controls */}
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            {/* Scope Selector */}
+            <div className="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800">
+              <button
+                onClick={() => setDossierScope('summary')}
+                className={`px-2.5 py-1 rounded text-[11px] font-mono font-bold transition-all cursor-pointer ${
+                  dossierScope === 'summary'
+                    ? 'bg-slate-800 text-cyanCore border border-cyanCore/40 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Executive Brief (2 Pgs)
+              </button>
+              <button
+                onClick={() => setDossierScope('full')}
+                className={`px-2.5 py-1 rounded text-[11px] font-mono font-bold transition-all cursor-pointer ${
+                  dossierScope === 'full'
+                    ? 'bg-slate-800 text-noorEmerald border border-noorEmerald/40 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Full Dossier (20+ Pgs)
+              </button>
+            </div>
 
-            <button
-              onClick={() => handleExportClick('docx')}
-              className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-noorEmerald border border-noorEmerald/40 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-              title="Download Word Document"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-noorEmerald" />
-              <span>Word (.docx)</span>
-            </button>
+            {/* Download Buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleExportClick('pdf')}
+                disabled={isExporting}
+                className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-cyanCore border border-cyanCore/40 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                title={`Download ${dossierScope === 'full' ? '20+ Page Full Technical PDF' : '2 Page Executive Brief PDF'}`}
+              >
+                <Download className="w-3.5 h-3.5 text-cyanCore" />
+                <span>{isExporting ? 'Generating...' : `PDF (.pdf${dossierScope === 'full' ? ' 20+P' : ''})`}</span>
+              </button>
 
-            <button
-              onClick={() => handleExportClick('txt')}
-              className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-convexBorder flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-              title="Download Plain Text Dossier"
-            >
-              <FileText className="w-3.5 h-3.5 text-slate-400" />
-              <span>Text (.txt)</span>
-            </button>
+              <button
+                onClick={() => handleExportClick('docx')}
+                className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-noorEmerald border border-noorEmerald/40 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                title={`Download ${dossierScope === 'full' ? '20+ Page Full Technical Word Document' : '2 Page Executive Brief Word Document'}`}
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-noorEmerald" />
+                <span>Word (.docx)</span>
+              </button>
+
+              <button
+                onClick={() => handleExportClick('txt')}
+                className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-convexBorder flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                title="Download Plain Text Dossier"
+              >
+                <FileText className="w-3.5 h-3.5 text-slate-400" />
+                <span>Text (.txt)</span>
+              </button>
+            </div>
           </div>
         </div>
 
