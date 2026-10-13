@@ -16,7 +16,7 @@ runConfig:
 env:
   # Cloud Run backend URL — set this after deploying the FastAPI service
   - variable: NEXT_PUBLIC_API_URL
-    value: https://cellnoor-api-PLACEHOLDER.run.app
+    value: https://cellnoor-api-1082846403596.us-central1.run.app
     availability:
       - BUILD
       - RUNTIME
