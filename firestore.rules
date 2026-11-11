@@ -4,13 +4,44 @@ service cloud.firestore {
     // Only backend services or authenticated admin can view the entire lead list
     match /leads/{leadId} {
       allow read: if request.auth != null && request.auth.token.email == 'amjad@noorgenx.com';
-      allow write: if true; // Allows prospective leads to record downloads
+
+      // Public lead capture (apps/web/src/lib/firebaseDossier.ts) creates one
+      // doc per prospect, keyed by their own lowercased email, on first
+      // download. Field set + doc-id/email match are enforced so a caller
+      // can't plant a doc for someone else's email or inject extra fields.
+      allow create: if request.resource.data.keys().hasOnly([
+                        'email', 'fullName', 'institutionOrCompany', 'jobRole',
+                        'createdAt', 'lastActiveAt', 'totalDownloads', 'downloadHistory'
+                      ])
+                    && request.resource.data.email is string
+                    && request.resource.data.email.lower() == leadId;
+
+      // Repeat visits update bookkeeping only (recordDossierDownload's
+      // updateDoc call touches exactly these three fields) -- the identity
+      // fields set at create time can never be changed from the client.
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+                      .hasOnly(['lastActiveAt', 'totalDownloads', 'downloadHistory']);
+
+      // No client ever deletes a lead; "write: if true" previously allowed it.
+      allow delete: if false;
     }
-    
+
     // Aggregated telemetry is readable for dashboard display, writable for download increments
     match /dossier_telemetry/{paperId} {
       allow read: if true;
-      allow write: if true;
+
+      // recordDossierDownload's merge-set always writes exactly this field
+      // set, keyed to its own paperId -- "write: if true" previously let a
+      // caller inject arbitrary fields or overwrite any paper's counters
+      // wholesale (including deleting one, now disallowed below).
+      allow create, update: if request.resource.data.keys().hasOnly([
+                                'paperId', 'title', 'totalRequests', 'pdfDownloads',
+                                'docxDownloads', 'txtDownloads', 'uniqueLeadsCount',
+                                'lastRequestedAt'
+                              ])
+                            && request.resource.data.paperId == paperId;
+
+      allow delete: if false;
     }
     
     // Audit logs are append-only
