@@ -1,6 +1,10 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
 from typing import Dict, Any
 
 from packages.schemas import (
@@ -32,17 +36,37 @@ from apps.api.routers.billing import router as billing_router
 from apps.api.routers.export import router as export_router
 from apps.api.routers.patient_diagnostic import router as patient_diagnostic_router
 
+import os as _os
+
+# Interactive API docs (Swagger/ReDoc/OpenAPI schema) leak the full route and
+# model surface to anyone, unauthenticated. Off unless a deploy explicitly
+# opts in with ENVIRONMENT=development.
+_environment = _os.getenv("ENVIRONMENT", "production")
+_docs_enabled = _environment != "production"
+
 app = FastAPI(
     title="CellNoor API",
     description="Computational backend for CellNoor (v2.0 AML Flagship) research environment",
     version="2.0.0",
+    docs_url="/docs" if _docs_enabled else None,
+    redoc_url="/redoc" if _docs_enabled else None,
+    openapi_url="/openapi.json" if _docs_enabled else None,
 )
+
+# Every route here is reachable with no authentication of any kind (no user
+# accounts exist on this service), including PDF/DOCX generation, live
+# Stripe/PayPal checkout session creation, and file-parsing endpoints -- all
+# real cost/abuse surface. A blanket per-IP rate limit is the floor until a
+# real auth layer exists; it applies to every route automatically via
+# SlowAPIMiddleware, no per-endpoint decorator needed.
+limiter = Limiter(key_func=get_remote_address, default_limits=["30/minute"])
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 app.include_router(billing_router)
 app.include_router(export_router)
 app.include_router(patient_diagnostic_router)
-
-import os as _os
 
 # Production CORS: read from ALLOWED_ORIGINS env var (comma-separated list).
 # Example Cloud Run flag:

@@ -26,6 +26,17 @@ class DiagnosticResponse(BaseModel):
 
 @router.post("/analyze", response_model=DiagnosticResponse)
 async def analyze_patient_report(file: UploadFile = File(...)):
+    # Matches the frontend's own NEXT_PUBLIC_PHASE_3_STATUS=NO-GO flag: the
+    # route stays registered for API compatibility, but a demo/regex-based
+    # "diagnostic" generator producing regimen/dosing-sounding output from an
+    # unauthenticated upload is a liability this service shouldn't carry while
+    # the feature is disabled on the frontend. Disable it here too rather
+    # than leaving the backend silently reachable on its own.
+    raise HTTPException(
+        status_code=503,
+        detail="This endpoint is disabled (Phase 3: NO-GO). Patient-level diagnostic "
+        "output is not available from this service.",
+    )
     filename = file.filename.lower() if file.filename else "patient_sample.vcf"
     content = await file.read()
     text_content = content.decode("utf-8", errors="ignore")
